@@ -38,7 +38,7 @@ Xong khi `PREFLIGHT: OK`.
 | Dịch vụ | Biến | Việc học viên làm |
 |---|---|---|
 | Apify | `APIFY_TOKEN` | `console.apify.com` → Settings → API & Integrations → copy Personal API token |
-| Genmax | `GENMAX_API_KEY` | đăng ký bằng link giới thiệu của giảng viên `https://genmax.io/?ref=mzkkz9` (đăng nhập Google), mở `https://genmax.io/docs`, bấm ô code đầu trang để copy khoá. Nạp credit nhập mã `KMGENMAX` được thêm 15% (không bắt buộc; tài khoản mới có ít credit dùng thử) |
+| Genmax | `GENMAX_API_KEY` | đăng ký tại `https://genmax.io/?ref=mzkkz9` (link có sẵn ở đây, học viên không phải chờ ai gửi; đăng nhập Google), mở `https://genmax.io/docs`, bấm ô code đầu trang để copy khoá. Nạp credit nhập mã `KMGENMAX` được thêm 15% (không bắt buộc; tài khoản mới có ít credit dùng thử) |
 | Gemini | `GEMINI_API_KEY` | `aistudio.google.com/apikey` → đăng nhập Google → tạo khoá |
 | Telegram (tuỳ chọn) | `TELEGRAM_BOT_TOKEN` | app Telegram → nhắn `@BotFather` → `/newbot` → copy token → nhắn bot của mình 1 câu |
 Nhắc: **không dán khoá vào khung chat**, không chụp ảnh/gửi file `.env`. Học viên chỉ cần báo “đã lưu”.

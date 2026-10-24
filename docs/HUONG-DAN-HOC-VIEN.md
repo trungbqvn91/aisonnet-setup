@@ -32,7 +32,7 @@ Thời gian là **ước tính**, phụ thuộc mạng và máy.
 2. Mở file vừa tải và cài như phần mềm bình thường (Mac: kéo vào thư mục Applications). Nếu máy hỏi quyền (hộp thoại Windows xanh/vàng, hoặc macOS hỏi mật khẩu): bấm **Yes/Có** hoặc tự nhập mật khẩu của bạn.
 3. Mở Claude, **đăng nhập** bằng tài khoản có gói trả phí.
 
-> **Nếu ứng dụng Claude không có tab "Code"** (hoặc tab Code không chạy): báo giảng viên, sẽ có cách thay thế. Đừng cố tự xử lý.
+> **Nếu ứng dụng Claude không có tab "Code"**: mở cửa sổ lệnh và dán đúng một dòng — Windows (PowerShell): `irm https://claude.ai/install.ps1 | iex`; Mac (Terminal): `curl -fsSL https://claude.ai/install.sh | bash`. Cài xong mở cửa sổ lệnh mới, gõ `claude`, đăng nhập, rồi dán prompt ở Bước 3 vào đó (bỏ qua Bước 2).
 
 ## Bước 2 — Mở tab Code
 1. Trong Claude, bấm tab **Code**.
@@ -41,7 +41,11 @@ Thời gian là **ước tính**, phụ thuộc mạng và máy.
 4. Claude hỏi "tin tưởng thư mục này không": bấm **Có**.
 
 ## Bước 3 — Dán prompt
-Mở tin nhắn giảng viên gửi, **copy nguyên đoạn prompt**, dán vào khung chat của Claude và gửi. Prompt này dùng chung cho Windows và Mac; nó cho Claude phép tải bộ cài và làm các việc ở bước 4.
+**Copy nguyên đoạn prompt dưới đây**, dán vào khung chat của Claude (tab Code) và gửi. Prompt dùng chung cho Windows và Mac; nó cho Claude phép tải bộ cài và làm các việc ở bước 4.
+
+```
+Tôi là học viên khoá AISONNET, đang chuẩn bị máy cho lớp. Tôi không rành máy tính và không biết chắc máy mình là Windows hay Mac, nên hãy tự kiểm tra hệ điều hành rồi làm đúng theo máy này. Tôi đồng ý để Claude làm các việc sau trên máy này: (1) tự tạo thư mục AISONNET nếu chưa có (Windows: C:\AISONNET; Mac: thư mục AISONNET trong thư mục Home của tôi), rồi tải bộ cài từ https://github.com/trungbqvn91/aisonnet-setup/releases/latest/download/aisonnet-setup.zip về đó, giải nén và chạy các script trong bộ cài; (2) cài các phần mềm của khoá (Git, Python, FFmpeg, Whisper, Playwright, extension Chrome, và VS Code nếu tôi chọn; trên Mac thì qua Homebrew); (3) đặt biến môi trường cho tài khoản của tôi và thêm một khối ghi chú vào file CLAUDE.md toàn cục của tôi (thư mục .claude trong thư mục Home). Việc nào cần mật khẩu máy (Mac: cài Xcode Command Line Tools và Homebrew) thì hãy hướng dẫn để tôi tự gõ trong cửa sổ Terminal; tôi sẽ không đưa mật khẩu hay API key vào khung chat — khi cần khoá, hãy mở file cho tôi tự điền. Sau khi tải xong, hãy kiểm tra file tải về đúng là ZIP và có SETUP.md bên trong, rồi đọc CLAUDE.md trong thư mục AISONNET và làm theo từng bước nó chỉ: hỏi tôi bằng câu ngắn dễ hiểu, báo tiến độ sau mỗi bước, và tự tìm cách xử lý nếu gặp lỗi, đừng bỏ cuộc ở lỗi đầu tiên. Nếu không tải được, hãy hướng dẫn tôi từng bước mở trang https://github.com/trungbqvn91/aisonnet-setup/releases, tải file aisonnet-setup.zip bằng trình duyệt rồi giải nén giúp tôi vào thư mục AISONNET.
+```
 
 ## Bước 4 — Claude cài tự động
 Claude sẽ:
@@ -59,7 +63,7 @@ Claude mở file **khoá API** (Windows: Notepad; Mac: TextEdit) và dẫn từn
 | Dịch vụ | Dùng để | Lấy khoá ở đâu |
 |---|---|---|
 | **Apify** | Quét TikTok, Facebook | console.apify.com → Settings → API & Integrations → copy Personal API token |
-| **Genmax** | Tạo giọng đọc | Đăng ký bằng link giảng viên gửi (tài khoản mới có ít credit dùng thử), vào genmax.io/docs, copy khoá. Nạp credit nhập mã **KMGENMAX** được thêm 15% (không bắt buộc) |
+| **Genmax** | Tạo giọng đọc | Đăng ký bằng Google tại https://genmax.io/?ref=mzkkz9 (tài khoản mới có ít credit dùng thử), vào https://genmax.io/docs, copy khoá ở ô mã đầu trang. Nạp credit nhập mã **KMGENMAX** được thêm 15% (không bắt buộc) |
 | **Gemini** | Phân tích video | aistudio.google.com/apikey → đăng nhập Google → tạo khoá |
 | **Telegram** (tuỳ chọn) | Nhận thông báo | Trong app Telegram nhắn **@BotFather**, gõ `/newbot`, copy token; rồi nhắn bot của bạn 1 câu bất kỳ |
 

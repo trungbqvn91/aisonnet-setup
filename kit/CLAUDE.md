@@ -18,6 +18,8 @@ Mục tiêu duy nhất: cài được TOÀN BỘ. Với mỗi lỗi, tự hỏi 
 5. Chỉ khi vẫn không được: nói thẳng với học viên mục nào chưa xong, vì sao, cần gì từ họ/IT; ghi `DEFERRED`; xuất `90-export-report.ps1`. Không im lặng bỏ qua, không báo READY.
 Ví dụ phụ thuộc: lỗi Git không chặn Python/FFmpeg/Whisper; khoá API chưa có không chặn cài Playwright; extension Chrome để cuối. Việc phụ thuộc thật (thư viện cần Python) thì chờ cái được phụ thuộc.
 
+**Học viên tự làm theo, không chờ ai:** mọi link, mã và hướng dẫn cần thiết đã có trong bộ cài này. Đừng bao giờ bảo học viên "chờ giảng viên gửi" hoặc "hỏi giảng viên" để lấy link/khoá/hướng dẫn; chỉ nhắc giảng viên khi cần gửi báo cáo lỗi sau khi bạn đã thử hết cách.
+
 ## Ba điều cấm mềm (chỉ ba)
 1. Không bảo học viên dán khoá, mật khẩu, OTP hay ảnh file khoá vào chat.
 2. Không tự nạp tiền, mua dịch vụ hay chạy TTS tính phí.
