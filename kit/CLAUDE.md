@@ -1,6 +1,8 @@
 # Điều phối cài đặt AISONNET
 
-Vai trò của bạn: dẫn học viên (thường **không rành máy tính**) hoàn tất bộ cài Windows ở `C:\AISONNET`, cài **đủ** mọi thứ của khoá học và làm cho nó **chạy được ở mọi phiên, mọi thư mục** — không chỉ phiên này. Bắt đầu bằng `INTERVIEW.md`, rồi đi lần lượt từng phase trong `SETUP.md`. Tự dò máy, đừng hỏi điều script tự dò được.
+**Bước đầu tiên: xác định hệ điều hành.** Windows → làm theo `SETUP.md` (thư mục `C:\AISONNET`, script `.ps1`). **macOS → làm theo `SETUP-MAC.md`** (thư mục `~/AISONNET`, script `.sh`, bản BETA chưa kiểm chứng trên Mac thật; các quy tắc dưới đây vẫn áp dụng; chỗ nào nói "UAC/PowerShell/winget" thì tương ứng là "mật khẩu máy/bash/Homebrew"). Mã lỗi tra `RECOVERY.md` (có mục macOS ở cuối).
+
+Vai trò của bạn: dẫn học viên (thường **không rành máy tính**) hoàn tất bộ cài ở `C:\AISONNET` (Windows) hoặc `~/AISONNET` (Mac), cài **đủ** mọi thứ của khoá học và làm cho nó **chạy được ở mọi phiên, mọi thư mục** — không chỉ phiên này. Bắt đầu bằng `INTERVIEW.md`, rồi đi lần lượt từng phase trong `SETUP.md`. Tự dò máy, đừng hỏi điều script tự dò được.
 
 ## Thang tự chủ
 - **A — tự làm ngay:** dò máy, chạy script trong `scripts\`, đọc `SETUP-LOG.md` và `state\*.json`, retry lỗi mạng (tối đa 2 lần), mở trang chính thức đã ghi, ghi log, báo tiến độ.

@@ -7,6 +7,8 @@ DRY_RUN=0
 CHECK_ONLY=0
 SKIP_TELEGRAM=0
 FETCH_CHAT=0
+PREPARE=0
+OPEN_EDITOR=0
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
@@ -14,6 +16,8 @@ while [ "$#" -gt 0 ]; do
     --check-only) CHECK_ONLY=1 ;;
     --skip-telegram) SKIP_TELEGRAM=1 ;;
     --fetch-telegram-chat-id) FETCH_CHAT=1 ;;
+    --prepare) PREPARE=1 ;;
+    --open-editor) OPEN_EDITOR=1 ;;
     *) printf 'E_KEY_INVALID: tham so khong hop le\n'; exit 1 ;;
   esac
   shift
@@ -25,6 +29,28 @@ if [ ! -f "$env_file" ]; then
   if [ -f "$ROOT/templates/env.template" ]; then cp "$ROOT/templates/env.template" "$env_file"; else
     set_status KEYS E_KEY_INVALID 'env template missing'; exit 1
   fi
+fi
+# Giong doc mac dinh cua khoa hoc (Adam, ElevenLabs v3, the cam xuc): chi dien khi con trong.
+if [ "$CHECK_ONLY" -eq 0 ]; then
+  for pair in GENMAX_VOICE_ID=pNInz6obpgDQGcFmaJgB GENMAX_MODEL=eleven_v3 GENMAX_EMOTION_TAGS=1; do
+    default_name=${pair%%=*}; default_value=${pair#*=}
+    if [ -z "$(read_dotenv_value "$env_file" "$default_name")" ]; then
+      set_dotenv_value "$env_file" "$default_name" "$default_value"
+    fi
+  done
+fi
+# Bieu tuong Desktop: bam dup de mo file khoa bang TextEdit.
+desktop_cmd="$HOME/Desktop/Mo file khoa API.command"
+if [ ! -f "$desktop_cmd" ] && [ -d "$HOME/Desktop" ]; then
+  printf '#!/bin/bash\nopen -e "%s"\n' "$env_file" > "$desktop_cmd"
+  chmod +x "$desktop_cmd"
+fi
+if [ "$OPEN_EDITOR" -eq 1 ]; then open -e "$env_file"; fi
+if [ "$PREPARE" -eq 1 ]; then
+  set_status KEYS-PREPARE OK 'env file and desktop shortcut created'
+  log_info "Da tao file khoa: $env_file"
+  log_info 'Hoc vien dien khoa, bam Cmd+S, dong TextEdit, roi bao Claude "da luu".'
+  exit 0
 fi
 check_one() {
   key_name="$1"; key_value="$2"; key_url="$3"; key_header="$4"
@@ -70,11 +96,13 @@ if [ "$FETCH_CHAT" -eq 1 ]; then log_info 'BO_QUA: tu lay chat ID can kiem JSON 
 if [ "$CHECK_ONLY" -eq 0 ]; then
   profile=$(mktemp "${TMPDIR:-/tmp}/aisonnet.keys.XXXXXX") || exit 1
   printf '# AISONNET:BEGIN\nexport PYTHONUTF8=1\nexport PYTHONIOENCODING=utf-8\n' > "$profile"
-  for key_name in APIFY_TOKEN GENMAX_API_KEY GENMAX_VOICE_ID GEMINI_API_KEY; do
+  for key_name in APIFY_TOKEN GENMAX_API_KEY GENMAX_VOICE_ID GENMAX_MODEL GENMAX_EMOTION_TAGS GEMINI_API_KEY; do
     key_value=$(read_dotenv_value "$env_file" "$key_name")
     [ -n "$key_value" ] || continue
     safe_value=$(printf '%s' "$key_value" | sed "s/'/'\\\\''/g")
     printf "export %s='%s'\n" "$key_name" "$safe_value" >> "$profile"
+    # Ung dung mo tu Finder/Dock (vd Claude Desktop) khong doc .zprofile: dat them cho phien dang nhap.
+    if has_cmd launchctl; then launchctl setenv "$key_name" "$key_value" 2>/dev/null || true; fi
   done
   for key_name in TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID; do
     key_value=$(read_dotenv_value "$env_file" "$key_name")
@@ -85,7 +113,7 @@ if [ "$CHECK_ONLY" -eq 0 ]; then
   printf '# AISONNET:END\n' >> "$profile"
   update_marker_block "$HOME/.zprofile" '# AISONNET:BEGIN' '# AISONNET:END' "$profile"
   rm -f "$profile"
-  global_block="$ROOT/templates/global-claude-block.md"
+  global_block="$ROOT/templates/global-claude-block-mac.md"
   if [ -f "$global_block" ]; then
     update_marker_block "$HOME/.claude/CLAUDE.md" '<!-- AISONNET:BEGIN' \
       '<!-- AISONNET:END -->' "$global_block"

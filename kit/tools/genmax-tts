@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Doc van ban bang Genmax (mac dinh Adam, eleven_v3, the cam xuc). Dung python cua bo cai.
+here=$(cd "$(dirname "$0")" && pwd)
+exec "$HOME/.aisonnet/venv/bin/python" -X utf8 "$here/genmax_tts.py" "$@"

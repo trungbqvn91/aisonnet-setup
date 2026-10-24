@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Kiem tra nhanh moi thu (chay duoc tu thu muc bat ky).
+here=$(cd "$(dirname "$0")" && pwd)
+exec bash "$here/../scripts/mac/60-smoke.sh" --quick "$@"

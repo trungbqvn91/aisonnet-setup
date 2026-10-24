@@ -1,25 +1,7 @@
-# AISONNET macOS scripts (DRAFT)
-
-These scripts are DRAFT - CHUA KIEM CHUNG tren macOS that.
-
-Run from the kit folder after copying it to `~/AISONNET`:
-
-```bash
-bash scripts/mac/00-preflight.sh
-bash scripts/mac/10-install-core.sh
-bash scripts/mac/20-python-libs.sh
-bash scripts/mac/30-whisper.sh --model base
-bash scripts/mac/40-browser-tools.sh
-bash scripts/mac/50-keys-sync.sh --check-only
-bash scripts/mac/60-smoke.sh
-bash scripts/mac/90-export-report.sh
-```
-
-Every script accepts `--dry-run` and `--root DIR`.
-Homebrew is never installed automatically. If it is missing, run the official
-command shown by `10-install-core.sh` in a real Terminal and enter your own
-password. Keys stay in `~/AISONNET/.env`; scripts never print their values.
-
-Known limits: this is tested only for Bash logic on Linux. Apple Silicon,
-Intel, Homebrew, Python wheels, Playwright, API checks, and macOS profiles
-still need real-mac verification.
+# Ban Mac (BETA - chua kiem chung tren Mac that)
+Cach dung chi tiet: ../../SETUP-MAC.md (Claude dan hoc vien theo tung phase).
+Chay thu cong: bash ~/AISONNET/scripts/mac/<ten>.sh [--dry-run] [--root DIR]
+Thu tu: 00-preflight, (Xcode CLT + Homebrew: hoc vien tu go mat khau trong Terminal),
+10-install-core, 20-python-libs, 30-whisper, 40-browser-tools, 50-keys-sync, 60-smoke, 90-export-report.
+Da kiem: logic bash trong Linux (Docker) + shellcheck. CHUA kiem: Homebrew, Xcode, macOS that, Intel.
+Gioi han: Mac Intel va macOS <= 12 ngoai pham vi; hoc vien Mac la nguoi thu dau tien - hay gui bao-cao-ho-tro.txt.

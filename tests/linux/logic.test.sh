@@ -56,5 +56,42 @@ for script in "$repo"/kit/scripts/mac/[0-9]*.sh; do
 done
 after=$(find "$tmp" -type f | sort)
 expect "$after" "$before" dry-no-files
+# --- che khoa khong dung regex: ky tu dac biet, khoang trang, gia tri chua / | & \
+special='ab/c|d&e\f g$h'
+out=$(printf 'loi voi %s xong\n' "$special" | redact_secrets "$special")
+expect "$out" 'loi voi *** xong' redact-special-chars
+secretfile="$tmp/secrets"
+printf '%s\n' 'GIATRI.CHAM*SAO' > "$secretfile"
+out=$(printf 'x GIATRI.CHAM*SAO y\nGIATRIXCHAMYSAO\n' | AISONNET_SECRET_FILE="$secretfile" redact_secrets)
+expect "$out" "$(printf 'x *** y\nGIATRIXCHAMYSAO')" redact-file-literal-not-regex
+# --- set_dotenv_value
+envf="$tmp/set.env"
+printf '# giu\nA=1\nB=\n' > "$envf"
+set_dotenv_value "$envf" B hai
+set_dotenv_value "$envf" C ba
+expect "$(read_dotenv_value "$envf" B)" hai setenv-replace
+expect "$(read_dotenv_value "$envf" C)" ba setenv-append
+expect "$(head -n 1 "$envf")" '# giu' setenv-keep-comment
+# --- 50-keys-sync --prepare that (khong mang): tao .env, bieu tuong, mac dinh giong
+fakehome="$tmp/home"; mkdir -p "$fakehome/Desktop" "$tmp/kit-root/templates"
+cp "$repo/kit/templates/env.template" "$tmp/kit-root/templates/"
+HOME="$fakehome" bash "$repo/kit/scripts/mac/50-keys-sync.sh" --root "$tmp/kit-root" --prepare >/dev/null 2>&1
+expect "$(read_dotenv_value "$tmp/kit-root/.env" GENMAX_VOICE_ID)" pNInz6obpgDQGcFmaJgB prepare-default-voice
+expect "$(read_dotenv_value "$tmp/kit-root/.env" GENMAX_MODEL)" eleven_v3 prepare-default-model
+if [ -x "$fakehome/Desktop/Mo file khoa API.command" ]; then ok prepare-desktop-command; else bad prepare-desktop-command; fi
+if [ -f "$tmp/kit-root/state/keys-prepare.json" ]; then ok prepare-status-file; else bad prepare-status-file; fi
+# --- 90-export-report that: khong lo khoa co ky tu dac biet, che $HOME
+set_dotenv_value "$tmp/kit-root/.env" APIFY_TOKEN 'tok/en|x&y\z'
+expect "$(read_dotenv_value "$tmp/kit-root/.env" APIFY_TOKEN)" 'tok/en|x&y\z' export-secret-stored
+mkdir -p "$tmp/kit-root/state"
+printf 'ghi chu tok/en|x&y\\z va %s/thu-muc\n' "$fakehome" > "$tmp/kit-root/SETUP-LOG.md"
+HOME="$fakehome" bash "$repo/kit/scripts/mac/90-export-report.sh" --root "$tmp/kit-root" >/dev/null 2>&1
+report=$(cat "$tmp/kit-root/bao-cao-ho-tro.txt" 2>/dev/null)
+case "$report" in *'tok/en|x&y'*) bad export-no-leak ;; *) ok export-no-leak ;; esac
+case "$report" in *"$fakehome"*) bad export-masks-home ;; *) ok export-masks-home ;; esac
+# --- kit/ Mac: khong con 'status.json' ghi de, global block Mac co mac dinh Adam/v3
+case "$(cat "$repo/kit/templates/global-claude-block-mac.md")" in
+  *pNInz6obpgDQGcFmaJgB*eleven_v3*|*eleven_v3*pNInz6obpgDQGcFmaJgB*) ok mac-global-block-voice ;;
+  *) bad mac-global-block-voice ;; esac
 printf 'PASS=%s FAIL=%s\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

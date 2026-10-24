@@ -15,11 +15,12 @@ done
 . "$SCRIPT_DIR/common.sh"
 if [ "$DRY_RUN" -eq 1 ]; then log_info 'DRY-RUN: tao bao cao ho tro'; exit 0; fi
 env_file="$ROOT/.env"
-secrets=''
-for name in APIFY_TOKEN GENMAX_API_KEY GEMINI_API_KEY TELEGRAM_BOT_TOKEN; do
+secret_file=$(mktemp "${TMPDIR:-/tmp}/aisonnet.secretlist.XXXXXX") || exit 1
+for name in APIFY_TOKEN GENMAX_API_KEY GEMINI_API_KEY TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID; do
   value=$(read_dotenv_value "$env_file" "$name")
-  [ -z "$value" ] || secrets="$secrets $value"
+  [ -z "$value" ] || printf '%s\n' "$value" >> "$secret_file"
 done
+export AISONNET_SECRET_FILE="$secret_file"
 report_tmp=$(mktemp "${TMPDIR:-/tmp}/aisonnet.report.XXXXXX") || exit 1
 {
   printf 'AISONNET macOS DRAFT support report\n'
@@ -30,8 +31,11 @@ report_tmp=$(mktemp "${TMPDIR:-/tmp}/aisonnet.report.XXXXXX") || exit 1
     if has_cmd "$tool"; then "$tool" --version 2>/dev/null | head -n 1; fi
   done
 } > "$report_tmp"
-set --
-for secret in $secrets; do set -- "$@" "$secret"; done
-redact_secrets "$@" < "$report_tmp" | sed "s|$HOME|~|g" > "$ROOT/bao-cao-ho-tro.txt"
+redact_secrets < "$report_tmp" > "$ROOT/bao-cao-ho-tro.txt.tmp"
+# Che ten nguoi dung trong duong dan (khong dung regex: thay chuoi co dinh bang awk).
+awk -v home="$HOME" '{ out = ""; rest = $0
+  while ((p = index(rest, home)) > 0) { out = out substr(rest, 1, p - 1) "~"; rest = substr(rest, p + length(home)) }
+  print out rest }' "$ROOT/bao-cao-ho-tro.txt.tmp" > "$ROOT/bao-cao-ho-tro.txt"
+rm -f "$ROOT/bao-cao-ho-tro.txt.tmp" "$secret_file"
 rm -f "$report_tmp"
 set_status REPORT OK 'support report exported'

@@ -34,3 +34,18 @@ Mỗi lần xử lý: thử cách 1 → 2 → 3, ghi `SETUP-LOG.md`; chỉ sau �
 
 ## Lỗi ngoài bảng
 Đi hết cách 1 → 2 → 3 của lỗi gần nhất. Sau đó chỉ dùng tài liệu/trang chính thức, thực hiện **một** thay đổi đảo ngược được mỗi lần, xem kết quả và ghi log. Hỏi học viên trước nếu cần UAC/mật khẩu, ảnh hưởng ngoài phạm vi, chi phí, gửi dữ liệu, hay máy công ty. Không tắt Defender, không đổi chính sách bảo mật và không yêu cầu khoá trong chat. Sau cùng nếu vẫn kẹt: `90-export-report.ps1` (đã lọc khoá) và bảo học viên gửi **nội dung** `bao-cao-ho-tro.txt` cho giảng viên.
+
+## macOS (BETA — chưa kiểm chứng trên Mac thật)
+Script Mac in cùng mã lỗi như Windows; bảng dưới là chỗ KHÁC. Mọi lỗi mới: ghi `SETUP-LOG.md` (nhật ký quý cho giảng viên).
+
+| Mã / dấu hiệu | Cách 1 → 2 → 3 | Câu Claude nói |
+|---|---|---|
+| E_BREW (chưa có Homebrew) | Chưa có Xcode CLT thì cài trước (`xcode-select --install`) → học viên dán lệnh Homebrew chính thức vào **Terminal thật** và tự gõ mật khẩu → làm theo "Next steps" Homebrew in ra → mở Terminal mới | “Homebrew cần mật khẩu máy của bạn. Bạn tự gõ trong Terminal nhé — tôi không nhận mật khẩu.” |
+| `brew: command not found` sau khi cài | Apple Silicon: `eval "$(/opt/homebrew/bin/brew shellenv)"`; Intel: `/usr/local/bin/brew` → thêm vào `~/.zprofile` → mở Terminal mới | “Mở một cửa sổ Terminal mới để máy nhận Homebrew.” |
+| `xcode-select: error ... already installed` hoặc hộp thoại không hiện | `xcode-select -p` kiểm; nếu trống → `sudo xcode-select --reset` (học viên tự gõ mật khẩu) → cài lại | “Cần cài công cụ dòng lệnh của Apple trước.” |
+| `externally-managed-environment` (pip) | KHÔNG dùng `pip` của hệ thống; dùng `aisonnet-pip` hoặc `~/.aisonnet/venv/bin/pip` | “Mac không cho cài thư viện vào Python hệ thống; tôi dùng môi trường riêng.” |
+| Biến môi trường “không thấy” trong Claude Desktop | `launchctl` chỉ có hiệu lực sau khi mở lại ứng dụng: **Cmd+Q** Claude + Terminal, mở lại; vẫn không → đăng xuất/đăng nhập lại macOS | “Hãy thoát hẳn Claude (Cmd+Q) rồi mở lại.” |
+| `Operation not permitted` / hộp thoại quyền (Files & Folders, Full Disk) | Học viên bấm **Cho phép** khi macOS hỏi; không tắt bảo mật hệ thống | “macOS đang hỏi quyền; bạn bấm Cho phép nhé.” |
+| `zsh: permission denied` khi chạy script | Chạy bằng `bash đường-dẫn.sh` (file từ ZIP không có quyền chạy) | — |
+| Mac Intel / macOS cũ | Cảnh báo ngoài phạm vi; thử tiếp, ghi rõ vào báo cáo | “Máy này ngoài phạm vi kiểm thử; có thể gặp thêm lỗi.” |
+| Playwright/Chromium lỗi | Chạy lại `40-browser-tools.sh`; kiểm mạng; Gatekeeper chặn thì hỏi học viên, không tắt bảo mật | “Trình duyệt thử chưa sẵn sàng.” |

@@ -17,8 +17,9 @@ set_status() {
   if [ "${DRY_RUN:-0}" -eq 1 ]; then log_info "DRY-RUN status: $phase $code $msg"; return 0; fi
   mkdir -p "$ROOT/state"
   safe_msg=$(printf '%s' "$msg" | tr '"\n\r' '   ')
+  status_name=$(printf '%s' "$phase" | tr 'A-Z' 'a-z')
   printf '{"phase":"%s","code":"%s","time":"%s","msg":"%s"}\n' \
-    "$phase" "$code" "$(date '+%Y-%m-%dT%H:%M:%S')" "$safe_msg" > "$ROOT/state/status.json"
+    "$phase" "$code" "$(date '+%Y-%m-%dT%H:%M:%S')" "$safe_msg" > "$ROOT/state/$status_name.json"
   log_setup "$phase | $code | $safe_msg"
 }
 
@@ -82,18 +83,58 @@ update_marker_block() {
   mv "$marker_tmp" "$marker_file"
 }
 
-# Redact known secret patterns and optional literal values from stdin.
+# Redact secrets from stdin WITHOUT regex: literal values come from arguments and from the
+# file named in AISONNET_SECRET_FILE (one value per line). Known key shapes are masked too.
 redact_secrets() {
-  redacted=$(cat)
+  secret_list=$(mktemp "${TMPDIR:-/tmp}/aisonnet.secrets.XXXXXX") || return 1
   for secret in "$@"; do
-    [ -n "$secret" ] || continue
-    redacted=$(printf '%s' "$redacted" | sed "s|$secret|***|g")
+    [ -z "$secret" ] || printf '%s\n' "$secret" >> "$secret_list"
   done
-  printf '%s\n' "$redacted" | sed \
+  if [ -n "${AISONNET_SECRET_FILE:-}" ] && [ -f "$AISONNET_SECRET_FILE" ]; then
+    cat "$AISONNET_SECRET_FILE" >> "$secret_list"
+  fi
+  awk -v list="$secret_list" '
+    BEGIN {
+      count = 0
+      while ((getline value < list) > 0) { if (length(value) >= 4) secrets[++count] = value }
+      close(list)
+    }
+    {
+      line = $0
+      for (i = 1; i <= count; i++) {
+        out = ""; rest = line
+        while ((pos = index(rest, secrets[i])) > 0) {
+          out = out substr(rest, 1, pos - 1) "***"
+          rest = substr(rest, pos + length(secrets[i]))
+        }
+        line = out rest
+      }
+      print line
+    }
+  ' | sed \
     -e 's/sk_[A-Za-z0-9][A-Za-z0-9]*/***/g' \
     -e 's/AIza[0-9A-Za-z_-][0-9A-Za-z_-]*/***/g' \
     -e 's/apify_api_[A-Za-z0-9][A-Za-z0-9]*/***/g' \
     -e 's/bot[0-9][0-9]*:[A-Za-z0-9_-][A-Za-z0-9_-]*/***/g'
+  rm -f "$secret_list"
+}
+
+# Set NAME=value in a dotenv file (keeps comments/order; appends when missing).
+set_dotenv_value() {
+  dotenv_target="$1"; dotenv_key="$2"; dotenv_val="$3"
+  [ -f "$dotenv_target" ] || : > "$dotenv_target"
+  dotenv_tmp="${dotenv_target}.aisonnet.$$"
+  awk -v key="$dotenv_key" -v val="$dotenv_val" '
+    BEGIN { done = 0 }
+    {
+      line = $0; sub(/\r$/, "", line)
+      probe = line; sub(/^[[:space:]]+/, "", probe)
+      if (index(probe, key "=") == 1) { print key "=" val; done = 1; next }
+      print line
+    }
+    END { if (done == 0) print key "=" val }
+  ' "$dotenv_target" > "$dotenv_tmp"
+  mv "$dotenv_tmp" "$dotenv_target"
 }
 
 # Execute a command unless this is a dry run.
@@ -142,3 +183,8 @@ classify_http() {
     *) printf '%s\n' 'E_KEY_INVALID' ;;
   esac
 }
+
+# Make Homebrew tools visible to this script even if the shell profile was not reloaded yet.
+for brew_candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+  if [ -x "$brew_candidate" ]; then eval "$("$brew_candidate" shellenv)"; break; fi
+done

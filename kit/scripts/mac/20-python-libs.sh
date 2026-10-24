@@ -37,8 +37,8 @@ printf '#!/usr/bin/env bash\nexec "%s" "$@"\n' "$VENV/bin/python" > "$BIN_DIR/ai
 printf '#!/usr/bin/env bash\nexec "%s" "$@"\n' "$VENV/bin/pip" > "$BIN_DIR/aisonnet-pip"
 chmod +x "$BIN_DIR/aisonnet-python" "$BIN_DIR/aisonnet-pip"
 block=$(mktemp "${TMPDIR:-/tmp}/aisonnet.profile.XXXXXX") || exit 1
-printf '# AISONNET:BEGIN\nexport PATH="%s:$PATH"\nexport PYTHONUTF8=1\n# AISONNET:END\n' \
-  "$BIN_DIR" > "$block"
+printf '# AISONNET:BEGIN\nexport PATH="%s:%s/tools:$PATH"\nexport PYTHONUTF8=1\n# AISONNET:END\n' \
+  "$BIN_DIR" "$ROOT" > "$block"
 update_marker_block "$HOME/.zprofile" '# AISONNET:BEGIN' '# AISONNET:END' "$block"
 rm -f "$block"
 "$VENV/bin/python" -X utf8 -c \
