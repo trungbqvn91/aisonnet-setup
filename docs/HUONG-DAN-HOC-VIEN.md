@@ -14,7 +14,7 @@ Làm xong phần này TRƯỚC buổi học đầu tiên. Bạn không cần bi�
 | **0. Chuẩn bị** | Gói Claude trả phí, mạng ổn định, máy còn trống ít nhất 8 GB | Bạn | 5 phút |
 | **1. Cài Claude** | Tải và cài ứng dụng Claude, đăng nhập | Bạn | 10 phút |
 | **2. Mở tab Code** | Vào tab **Code**, chọn một thư mục bất kỳ, chọn chế độ **Auto** | Bạn | 5 phút |
-| **3. Dán prompt** | Dán đoạn prompt giảng viên gửi (một bản chung cho mọi máy) | Bạn | 1 phút |
+| **3. Dán prompt** | Dán đoạn prompt ở Bước 3 (một bản chung cho mọi máy) | Bạn | 1 phút |
 | **4. Claude cài tự động** | Hỏi vài câu ngắn, tự nhận máy, cài phần mềm, báo tiến độ | **Claude** (bạn theo dõi, bấm đồng ý khi được hỏi) | 30–60 phút |
 | **5. Điền khoá API** | Tạo tài khoản, copy khoá dán vào file; thoát hẳn rồi mở lại Claude; kiểm tra lần cuối | Bạn + Claude | 15–30 phút |
 
@@ -75,7 +75,7 @@ Claude mở file **khoá API** (Windows: Notepad; Mac: TextEdit) và dẫn từn
 **Sau khi điền xong:** **thoát hẳn Claude** (Windows: đóng cửa sổ và kiểm tra icon dưới thanh Taskbar; Mac: **Cmd+Q**) rồi **mở lại**. Lý do: khoá chỉ có hiệu lực với ứng dụng mở *sau khi* điền. Claude chạy **kiểm tra cuối** và báo:
 - **READY**: xong hoàn toàn.
 - **READY với mục "để sau"**: dùng được, vài mục tuỳ chọn chưa làm (Claude nêu rõ).
-- **NOT_READY**: còn mục chưa đạt; Claude xử lý tiếp hoặc hướng dẫn bạn nhờ giảng viên.
+- **NOT_READY**: còn mục chưa đạt; Claude xử lý tiếp hoặc hướng dẫn bạn gửi báo cáo lỗi.
 
 ## Nếu gặp sự cố
 1. **Cứ nói với Claude** điều đang xảy ra (hoặc chụp màn hình lỗi, *trừ* file khoá API). Claude tự kiểm tra, sửa và đi tiếp.
