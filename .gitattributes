@@ -1,0 +1,10 @@
+# Script bash PHAI dung LF (CRLF lam hong tren Mac/Linux). Script Windows dung CRLF.
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+*.md   text eol=lf
+*.json text eol=lf
+*.txt  text eol=lf
+*.wav  binary
+*.zip  binary

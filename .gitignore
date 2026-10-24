@@ -1,0 +1,11 @@
+# không đưa vào git
+.env
+*.zip
+dist/
+state/
+SETUP-LOG.md
+__pycache__/
+*.pyc
+.venv*/
+node_modules/
+tests/tmp/
