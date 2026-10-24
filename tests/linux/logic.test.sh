@@ -93,5 +93,16 @@ case "$report" in *"$fakehome"*) bad export-masks-home ;; *) ok export-masks-hom
 case "$(cat "$repo/kit/templates/global-claude-block-mac.md")" in
   *pNInz6obpgDQGcFmaJgB*eleven_v3*|*eleven_v3*pNInz6obpgDQGcFmaJgB*) ok mac-global-block-voice ;;
   *) bad mac-global-block-voice ;; esac
+# --- Telegram: lay chat id tu getUpdates + phan loai ket qua gui tin
+updates='{"ok":true,"result":[{"update_id":1,"message":{"chat":{"id":111,"type":"private"}}},{"update_id":2,"message":{"chat":{"id":-100222,"type":"group"}}}]}'
+expect "$(printf '%s' "$updates" | extract_telegram_chat_id)" '-100222' tg-chat-id-latest
+expect "$(printf '%s' '{"ok":true,"result":[]}' | extract_telegram_chat_id)" '' tg-chat-id-empty
+expect "$(printf '%s' '{"result":[{"message":{"chat":{"id":987654321,"first_name":"A"}}}]}' | extract_telegram_chat_id)" '987654321' tg-chat-id-positive
+expect "$(classify_telegram_send 200)" OK tg-send-ok
+expect "$(classify_telegram_send 401)" E_TG_TOKEN tg-send-token
+expect "$(classify_telegram_send 403)" E_TG_BLOCKED tg-send-blocked
+expect "$(classify_telegram_send 400)" E_TG_CHAT tg-send-chat
+expect "$(classify_telegram_send 000)" E_KEY_NETWORK tg-send-network
+expect "$(classify_telegram_send 502)" E_KEY_NETWORK tg-send-5xx
 printf 'PASS=%s FAIL=%s\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

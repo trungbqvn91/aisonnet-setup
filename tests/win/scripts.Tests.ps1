@@ -136,6 +136,23 @@ Test-Case 'keys: giong da doi boi hoc vien KHONG bi ghi de' {
     Assert-Equal 'GIONG_KHAC_CUA_HOC_VIEN' (Read-DotEnv (Join-Path $keepRoot '.env'))['GENMAX_VOICE_ID']
 }
 
+Test-Case 'keys: -FetchTelegramChatId voi token gia khong lam hong, khong lo token' {
+    $tgRoot = Join-Path $sbx 'keys-tg'
+    $null = Invoke-Script '50-keys-sync.ps1' @('-Root', $tgRoot, '-Prepare', '-DesktopDir', $desk, '-ClaudeHome', $claudeHome)
+    Set-DotEnvValue (Join-Path $tgRoot '.env') 'TELEGRAM_BOT_TOKEN' $fakeTele
+    $r = Invoke-Script '50-keys-sync.ps1' @('-Root', $tgRoot, '-CheckOnly', '-FetchTelegramChatId', '-DesktopDir', $desk, '-ClaudeHome', $claudeHome)
+    Assert-NotContains $r.Output $fakeTele
+    Assert-Contains $r.Output 'TELEGRAM_BOT_TOKEN'
+}
+Test-Case 'keys: -SkipTelegram bo qua han buoc Telegram' {
+    $tgRoot2 = Join-Path $sbx 'keys-tg2'
+    $null = Invoke-Script '50-keys-sync.ps1' @('-Root', $tgRoot2, '-Prepare', '-DesktopDir', $desk, '-ClaudeHome', $claudeHome)
+    Set-DotEnvValue (Join-Path $tgRoot2 '.env') 'TELEGRAM_BOT_TOKEN' $fakeTele
+    $r = Invoke-Script '50-keys-sync.ps1' @('-Root', $tgRoot2, '-CheckOnly', '-SkipTelegram', '-FetchTelegramChatId', '-DesktopDir', $desk, '-ClaudeHome', $claudeHome)
+    Assert-NotContains $r.Output 'TELEGRAM_TEST'
+    Assert-NotContains $r.Output $fakeTele
+}
+
 # ---------------------------------------------------------------- 90-export-report: khong lot khoa
 Test-Case 'export: bao cao KHONG chua khoa va che ten nguoi dung' {
     $exRoot = Join-Path $sbx 'export'

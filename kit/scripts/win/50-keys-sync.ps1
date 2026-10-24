@@ -14,6 +14,7 @@ param(
     [switch]$CheckOnly,
     [switch]$SkipTelegram,
     [switch]$FetchTelegramChatId,
+    [switch]$TelegramTest,
     [string]$ClaudeHome = '',
     [string]$DesktopDir = ''
 )
@@ -131,6 +132,20 @@ foreach ($key in $keys) {
     }
     $health = Invoke-ApiHealth $name $value $key.Required -DryRun:$DryRun
     [void]$results.Add(@{ Name = $name; Required = $key.Required; Value = $value; Code = $health.Code; Note = $health.Note })
+}
+
+# Gui tin thu Telegram (sau khi lay chat id, hoac khi chay rieng voi -TelegramTest).
+if (($FetchTelegramChatId -or $TelegramTest) -and -not $DryRun -and -not $SkipTelegram) {
+    $tgToken = ''
+    $tgChat = ''
+    if ($values.Contains('TELEGRAM_BOT_TOKEN')) { $tgToken = [string]$values['TELEGRAM_BOT_TOKEN'] }
+    if ($values.Contains('TELEGRAM_CHAT_ID')) { $tgChat = [string]$values['TELEGRAM_CHAT_ID'] }
+    if ($tgToken -and $tgChat) {
+        $sent = Send-TelegramTest $tgToken $tgChat
+        Write-Ascii ("TELEGRAM_TEST | {0} | {1}" -f $sent.Code, $sent.Note)
+    } elseif ($tgToken) {
+        Write-Ascii 'TELEGRAM_TEST | BO_QUA | chua co chat id: hay bam Start, nhan bot 1 cau roi chay lai'
+    }
 }
 
 $failCode = 'OK'

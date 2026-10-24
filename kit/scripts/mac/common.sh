@@ -173,6 +173,23 @@ http_status() {
   printf '%s\n' "${http_code:-000}"
 }
 
+# Print the newest chat id found in a Telegram getUpdates JSON read from stdin.
+extract_telegram_chat_id() {
+  grep -o '"chat":{"id":-\{0,1\}[0-9]*' | tail -n 1 | sed 's/.*://'
+}
+
+# Map the HTTP status of a Telegram sendMessage call to a result code.
+classify_telegram_send() {
+  case "$1" in
+    200) printf '%s\n' 'OK' ;;
+    401|404) printf '%s\n' 'E_TG_TOKEN' ;;
+    403) printf '%s\n' 'E_TG_BLOCKED' ;;
+    400) printf '%s\n' 'E_TG_CHAT' ;;
+    000|5??) printf '%s\n' 'E_KEY_NETWORK' ;;
+    *) printf '%s\n' 'E_TG_SEND' ;;
+  esac
+}
+
 # Map HTTP status to the common key validation result.
 classify_http() {
   case "$1" in

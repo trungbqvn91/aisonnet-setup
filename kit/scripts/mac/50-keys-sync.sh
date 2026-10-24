@@ -92,7 +92,25 @@ if [ -n "$voice" ]; then voice_state=OK; else voice_state=BO_QUA; fi
 printf 'GENMAX_VOICE_ID | %s | %s\n' "$voice_state" "$(mask_key "$voice")"
 if [ -n "$chat_id" ]; then chat_state=OK; else chat_state=BO_QUA; fi
 printf 'TELEGRAM_CHAT_ID | %s | %s\n' "$chat_state" "$(mask_key "$chat_id")"
-if [ "$FETCH_CHAT" -eq 1 ]; then log_info 'BO_QUA: tu lay chat ID can kiem JSON tren macOS that'; fi
+if [ "$FETCH_CHAT" -eq 1 ] && [ "$SKIP_TELEGRAM" -eq 0 ] && [ -n "$telegram" ]; then
+  if [ -z "$chat_id" ]; then
+    updates=$(curl -s --max-time 20 "https://api.telegram.org/bot${telegram}/getUpdates" 2>/dev/null)
+    chat_id=$(printf '%s' "$updates" | extract_telegram_chat_id)
+    if [ -n "$chat_id" ]; then
+      set_dotenv_value "$env_file" TELEGRAM_CHAT_ID "$chat_id"
+      log_info 'Da tu lay chat id va ghi vao .env.'
+    else
+      log_info 'Chua thay tin nhan: hay bam Start, nhan bot 1 cau roi chay lai.'
+    fi
+  fi
+  if [ -n "$chat_id" ]; then
+    tg_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 --get \
+      "https://api.telegram.org/bot${telegram}/sendMessage" \
+      --data-urlencode "chat_id=${chat_id}" \
+      --data-urlencode 'text=AISONNET: ket noi Telegram thanh cong! Ban co the bo qua tin nay.')
+    printf 'TELEGRAM_TEST | %s\n' "$(classify_telegram_send "$tg_code")"
+  fi
+fi
 if [ "$CHECK_ONLY" -eq 0 ]; then
   profile=$(mktemp "${TMPDIR:-/tmp}/aisonnet.keys.XXXXXX") || exit 1
   printf '# AISONNET:BEGIN\nexport PYTHONUTF8=1\nexport PYTHONIOENCODING=utf-8\n' > "$profile"

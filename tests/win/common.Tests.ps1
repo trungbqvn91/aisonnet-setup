@@ -233,6 +233,26 @@ Test-Case 'log: loc khoa' {
     Assert-NotContains ([IO.File]::ReadAllText((Join-Path $root 'SETUP-LOG.md'))) $fakeGemini
 }
 
+# ---------------------------------------------------------------- Get-TelegramSendOutcome
+Test-Case 'telegram: gui tin thanh cong' { Assert-Equal 'OK' (Get-TelegramSendOutcome 200 '{"ok":true}') }
+Test-Case 'telegram: token sai (401/404)' {
+    Assert-Equal 'E_TG_TOKEN' (Get-TelegramSendOutcome 401 ''); Assert-Equal 'E_TG_TOKEN' (Get-TelegramSendOutcome 404 '')
+}
+Test-Case 'telegram: bi chan' {
+    Assert-Equal 'E_TG_BLOCKED' (Get-TelegramSendOutcome 403 'Forbidden: bot was blocked by the user')
+}
+Test-Case 'telegram: chat khong ton tai' { Assert-Equal 'E_TG_CHAT' (Get-TelegramSendOutcome 400 'Bad Request: chat not found') }
+Test-Case 'telegram: loi mang / 5xx' {
+    Assert-Equal 'E_KEY_NETWORK' (Get-TelegramSendOutcome 0 ''); Assert-Equal 'E_KEY_NETWORK' (Get-TelegramSendOutcome 502 '')
+}
+Test-Case 'telegram: loi la' { Assert-Equal 'E_TG_SEND' (Get-TelegramSendOutcome 400 'Bad Request: text is empty') }
+Test-Case 'telegram: Send-TelegramTest voi token gia khong in token, tra ma loi ro rang' {
+    $fakeToken = '123456789:' + ('Z' * 35)
+    $out = (& { $r = Send-TelegramTest $fakeToken '12345'; Write-Output ($r.Code + ' ' + $r.Note) } 6>&1 | Out-String)
+    Assert-NotContains $out $fakeToken
+    Assert-True ($out -match '^(E_TG_TOKEN|E_TG_SEND|E_KEY_NETWORK|E_TG_CHAT)') ('ma khong mong doi: ' + $out)
+}
+
 # ---------------------------------------------------------------- Get-VoiceRows (JSON mau lay tu tai lieu Genmax + code AIEdit-trung)
 $elevenJson = '{"voices":[{"voice_id":"rv30Fd6w5bnbL0kHzWlr","name":"Aria","gender":"female","description":"A young voice"},' +
               '{"voice_id":"CwhRBWXzGAHq8TQ4Fs17","name":"Roger","gender":"male","description":"Mature"}],"has_more":true}'

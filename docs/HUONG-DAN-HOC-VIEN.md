@@ -65,7 +65,7 @@ Claude mở file **khoá API** (Windows: Notepad; Mac: TextEdit) và dẫn từn
 | **Apify** | Quét TikTok, Facebook | console.apify.com → Settings → API & Integrations → copy Personal API token |
 | **Genmax** | Tạo giọng đọc | Đăng ký bằng Google tại https://genmax.io/?ref=mzkkz9 (tài khoản mới có ít credit dùng thử), vào https://genmax.io/docs, copy khoá ở ô mã đầu trang. Nạp credit nhập mã **KMGENMAX** được thêm 15% (không bắt buộc) |
 | **Gemini** | Phân tích video | aistudio.google.com/apikey → đăng nhập Google → tạo khoá |
-| **Telegram** (tuỳ chọn) | Nhận thông báo | Trong app Telegram nhắn **@BotFather**, gõ `/newbot`, copy token; rồi nhắn bot của bạn 1 câu bất kỳ |
+| **Telegram** (tuỳ chọn) | Nhận thông báo | Tạo bot với **@BotFather** — xem mục "Kết nối Telegram" bên dưới |
 
 **Quy tắc an toàn:**
 - **Không dán khoá vào khung chat** của Claude. Chỉ dán vào file.
@@ -76,6 +76,15 @@ Claude mở file **khoá API** (Windows: Notepad; Mac: TextEdit) và dẫn từn
 - **READY**: xong hoàn toàn.
 - **READY với mục "để sau"**: dùng được, vài mục tuỳ chọn chưa làm (Claude nêu rõ).
 - **NOT_READY**: còn mục chưa đạt; Claude xử lý tiếp hoặc hướng dẫn bạn gửi báo cáo lỗi.
+
+## Kết nối Telegram (tuỳ chọn, khoảng 5 phút)
+Không cần cài Telegram trên máy tính, dùng điện thoại là đủ. Bạn làm bước 1–3, Claude làm bước 4.
+1. **Tạo bot:** trong Telegram, tìm **@BotFather** (tài khoản có **tích xanh**), gõ `/newbot`. Đặt tên bot tuỳ ý, rồi đặt **username kết thúc bằng `bot`** (ví dụ `trang_koc_bot`). BotFather gửi lại **token** dạng `123456789:AAH...` — đây là **mật khẩu của bot**: copy lại, **không dán vào khung chat với Claude**.
+2. **Dán token vào file khoá:** dán sau dấu `=` ở dòng `TELEGRAM_BOT_TOKEN=`, lưu file, nhắn Claude "đã lưu". Dòng `TELEGRAM_CHAT_ID` để trống, Claude tự điền.
+3. **Nhắn bot:** mở Telegram, tìm đúng bot vừa tạo, bấm **Start**, nhắn "hi".
+4. **Claude tự lấy mã chat và gửi tin thử.** Telegram nhận được tin thử là xong.
+
+Hay gặp: quên lưu file nên Claude báo chưa có token → mở lại file, lưu rồi chạy lại; không lấy được mã chat → chưa bấm Start hoặc nhắn nhầm bot, nhắn "hi" đúng bot rồi nhờ Claude thử lại; đã chặn bot → bỏ chặn rồi Start lại; muốn bot gửi vào **nhóm** → thêm bot vào nhóm, nhắn "hi" trong nhóm rồi nhờ Claude lấy lại mã chat.
 
 ## Nếu gặp sự cố
 1. **Cứ nói với Claude** điều đang xảy ra (hoặc chụp màn hình lỗi, *trừ* file khoá API). Claude tự kiểm tra, sửa và đi tiếp.

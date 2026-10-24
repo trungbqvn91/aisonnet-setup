@@ -602,6 +602,31 @@ function Get-VoiceRows {
     return @($rows | Where-Object { $_.Id })
 }
 
+function Get-TelegramSendOutcome {
+    # Ham thuan: ma HTTP khi gui tin thu -> OK | E_TG_BLOCKED | E_TG_CHAT | E_TG_TOKEN | E_KEY_NETWORK | E_TG_SEND.
+    param([int]$Status, [AllowNull()][string]$Body)
+    $text = ''
+    if ($Body) { $text = $Body }
+    if ($Status -ge 200 -and $Status -lt 300) { return 'OK' }
+    if ($Status -eq 0 -or $Status -ge 500) { return 'E_KEY_NETWORK' }
+    if ($Status -eq 401 -or $Status -eq 404) { return 'E_TG_TOKEN' }
+    if ($Status -eq 403 -or $text -match '(?i)(blocked|kicked|forbidden)') { return 'E_TG_BLOCKED' }
+    if ($Status -eq 400 -and $text -match '(?i)chat not found') { return 'E_TG_CHAT' }
+    return 'E_TG_SEND'
+}
+
+function Send-TelegramTest {
+    # Gui 1 tin thu toi chat cua hoc vien. Tra { Code; Note }. KHONG bao gio in token/URL.
+    param([string]$Token, [string]$ChatId)
+    $message = [uri]::EscapeDataString('AISONNET: ket noi Telegram thanh cong! Ban co the bo qua tin nay.')
+    $url = 'https://api.telegram.org/bot' + $Token + '/sendMessage?chat_id=' + [uri]::EscapeDataString($ChatId) + '&text=' + $message
+    $reply = Invoke-ApiRequest $url @{}
+    $code = Get-TelegramSendOutcome $reply.Status $reply.Body
+    $note = 'http=' + $reply.Status
+    if ($code -eq 'OK') { $note = 'da gui tin thu - hay kiem tra Telegram' }
+    return @{ Code = $code; Note = $note }
+}
+
 function Invoke-ApiHealth {
     # Kiem tra 1 khoa. Tra { Name; Code; Note }. Code = OK | E_KEY_* | BO_QUA | CHUA_DIEN.
     param([string]$Name, [AllowNull()][string]$Value, [bool]$Required = $false, [switch]$DryRun)
