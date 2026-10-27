@@ -484,6 +484,9 @@ function Test-KeyFormat {
     # Ham thuan: tra '' neu hop le, nguoc lai tra ghi chu ngan (khong chua khoa).
     param([string]$Name, [AllowNull()][string]$Value)
     if ([string]::IsNullOrEmpty($Value)) { return '' }
+    if ($Name -eq 'TIKTOK_API23_KEY') {
+        if ($Value -match '(?i)rapidapi|header|curl') { return 'dan nham ca doan code: chi copy chuoi sau x-rapidapi-key' }
+    }
     if ($Value -match '\s') { return 'co khoang trang/xuong dong ben trong' }
     if ($Value -match '^["''<]|["''>]$') { return 'con dau nhay hoac dau <> bao quanh' }
     if ($Name -eq 'GENMAX_VOICE_ID') { return '' }
@@ -534,6 +537,12 @@ function Get-ApiSpec {
         'GEMINI_API_KEY' {
             $url = 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1'
             return @{ Url = $url; Headers = @{ 'x-goog-api-key' = $Value } }
+        }
+        'TIKTOK_API23_KEY' {
+            # Goi user-info tiktok (tru 1 trong 100 luot/thang cua goi BASIC). UA trinh duyet de tranh Cloudflare 1010.
+            $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36'
+            return @{ Url = 'https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=tiktok'
+                      Headers = @{ 'x-rapidapi-key' = $Value; 'x-rapidapi-host' = 'tiktok-api23.p.rapidapi.com'; 'User-Agent' = $ua } }
         }
         'TELEGRAM_BOT_TOKEN' {
             return @{ Url = ('https://api.telegram.org/bot' + $Value + '/getMe'); Headers = @{} }

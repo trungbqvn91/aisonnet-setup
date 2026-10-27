@@ -104,5 +104,10 @@ expect "$(classify_telegram_send 403)" E_TG_BLOCKED tg-send-blocked
 expect "$(classify_telegram_send 400)" E_TG_CHAT tg-send-chat
 expect "$(classify_telegram_send 000)" E_KEY_NETWORK tg-send-network
 expect "$(classify_telegram_send 502)" E_KEY_NETWORK tg-send-5xx
+# --- skill di kem + khoa RapidAPI o ban Mac
+if [ -f "$repo/kit/skills/rapidapi-tiktok-api23/SKILL.md" ]; then ok skill-in-kit; else bad skill-in-kit; fi
+case "$(cat "$repo/kit/scripts/mac/50-keys-sync.sh")" in *TIKTOK_API23_KEY*skills*|*skills*TIKTOK_API23_KEY*) ok mac-sync-handles-rapidapi-and-skills ;; *) bad mac-sync-handles-rapidapi-and-skills ;; esac
+expect "$(read_dotenv_value "$repo/kit/templates/env.template" TIKTOK_API23_KEY)" '' env-template-has-rapidapi-empty
+case "$(cat "$repo/kit/templates/env.template")" in *TIKTOK_API23_KEY=*) ok env-template-rapidapi-line ;; *) bad env-template-rapidapi-line ;; esac
 printf 'PASS=%s FAIL=%s\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

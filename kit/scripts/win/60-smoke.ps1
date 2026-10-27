@@ -92,9 +92,9 @@ if ($Quick -or $DryRun) {
 
 # 6) Bien moi truong: User co VA tien trinh hien tai cung thay (dung thu hoc vien se dung)
 $keyNames = @('APIFY_TOKEN', 'GENMAX_API_KEY', 'GENMAX_VOICE_ID', 'GENMAX_MODEL', 'GENMAX_EMOTION_TAGS',
-              'GEMINI_API_KEY', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID')
+              'GEMINI_API_KEY', 'TIKTOK_API23_KEY', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID')
 $healthNames = @('APIFY_TOKEN', 'GENMAX_API_KEY', 'GEMINI_API_KEY', 'TELEGRAM_BOT_TOKEN')
-$required = @('APIFY_TOKEN', 'GENMAX_API_KEY', 'GEMINI_API_KEY')
+$required = @('APIFY_TOKEN', 'GENMAX_API_KEY', 'GEMINI_API_KEY', 'TIKTOK_API23_KEY')
 $procValues = @{}
 foreach ($name in ($keyNames + @('PYTHONUTF8'))) {
     $userValue = Get-UserEnv $name
@@ -116,6 +116,12 @@ foreach ($name in $healthNames) {
     if ($health.Code -eq 'OK') { Add-Row "api:$name" 'OK' $health.Note }
     else { Add-Row "api:$name" 'LOI' ($health.Code + ' ' + $health.Note) }
 }
+
+# 7b) Skill di kem da duoc cai (khong goi API TikTok o day de khong ton luot BASIC 100/thang)
+$skillFile = Join-Path $ClaudeHome 'skills\rapidapi-tiktok-api23\SKILL.md'
+if ($DryRun) { Add-Row 'skill-rapidapi-tiktok' 'BO_QUA' 'DryRun' }
+elseif (Test-Path -LiteralPath $skillFile) { Add-Row 'skill-rapidapi-tiktok' 'OK' '' }
+else { Add-Row 'skill-rapidapi-tiktok' 'LOI' 'chua cai skill - chay 50-keys-sync.ps1' }
 
 # 8) Khoi toan cuc, lenh doctor, bieu tuong Desktop
 $claudeMd = Join-Path $ClaudeHome 'CLAUDE.md'

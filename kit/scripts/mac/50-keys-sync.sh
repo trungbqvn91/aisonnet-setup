@@ -53,7 +53,7 @@ if [ "$PREPARE" -eq 1 ]; then
   exit 0
 fi
 check_one() {
-  key_name="$1"; key_value="$2"; key_url="$3"; key_header="$4"
+  key_name="$1"; key_value="$2"; key_url="$3"; key_header="$4"; key_header2="${5:-}"; key_header3="${6:-}"
   if [ -z "$key_value" ]; then
     printf '%s | CHUA_DIEN | %s\n' "$key_name" "$(mask_key "$key_value")"
     return 1
@@ -61,7 +61,7 @@ check_one() {
   case "$key_value" in *' '*|*"$(printf '\n')"*)
     printf '%s | LOI:format | %s\n' "$key_name" "$(mask_key "$key_value")"; return 1 ;;
   esac
-  key_code=$(http_status "$key_url" "$key_header")
+  key_code=$(http_status "$key_url" "$key_header" "$key_header2" "$key_header3")
   key_result=$(classify_http "$key_code")
   printf '%s | %s | %s\n' "$key_name" "$key_result" "$(mask_key "$key_value")"
   [ "$key_result" = OK ]
@@ -70,6 +70,7 @@ apify=$(read_dotenv_value "$env_file" APIFY_TOKEN)
 genmax=$(read_dotenv_value "$env_file" GENMAX_API_KEY)
 voice=$(read_dotenv_value "$env_file" GENMAX_VOICE_ID)
 gemini=$(read_dotenv_value "$env_file" GEMINI_API_KEY)
+tiktok=$(read_dotenv_value "$env_file" TIKTOK_API23_KEY)
 telegram=$(read_dotenv_value "$env_file" TELEGRAM_BOT_TOKEN)
 chat_id=$(read_dotenv_value "$env_file" TELEGRAM_CHAT_ID)
 failed=0
@@ -80,6 +81,15 @@ check_one GENMAX_API_KEY "$genmax" 'https://api.genmax.io/v1/auth/me' \
 check_one GEMINI_API_KEY "$gemini" \
   'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1' \
   "x-goog-api-key: $gemini" || failed=1
+if [ -n "$tiktok" ]; then
+  check_one TIKTOK_API23_KEY "$tiktok" \
+    'https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=tiktok' \
+    "x-rapidapi-key: $tiktok" "x-rapidapi-host: tiktok-api23.p.rapidapi.com" \
+    'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/125.0 Safari/537.36' || failed=1
+else
+  printf 'TIKTOK_API23_KEY | CHUA_DIEN | (trong)\n'
+  failed=1
+fi
 if [ "$SKIP_TELEGRAM" -eq 1 ]; then
   printf 'TELEGRAM_BOT_TOKEN | BO_QUA | %s\n' "$(mask_key "$telegram")"
 elif [ -n "$telegram" ]; then
@@ -114,7 +124,7 @@ fi
 if [ "$CHECK_ONLY" -eq 0 ]; then
   profile=$(mktemp "${TMPDIR:-/tmp}/aisonnet.keys.XXXXXX") || exit 1
   printf '# AISONNET:BEGIN\nexport PYTHONUTF8=1\nexport PYTHONIOENCODING=utf-8\n' > "$profile"
-  for key_name in APIFY_TOKEN GENMAX_API_KEY GENMAX_VOICE_ID GENMAX_MODEL GENMAX_EMOTION_TAGS GEMINI_API_KEY; do
+  for key_name in APIFY_TOKEN GENMAX_API_KEY GENMAX_VOICE_ID GENMAX_MODEL GENMAX_EMOTION_TAGS GEMINI_API_KEY TIKTOK_API23_KEY; do
     key_value=$(read_dotenv_value "$env_file" "$key_name")
     [ -n "$key_value" ] || continue
     safe_value=$(printf '%s' "$key_value" | sed "s/'/'\\\\''/g")
@@ -131,6 +141,16 @@ if [ "$CHECK_ONLY" -eq 0 ]; then
   printf '# AISONNET:END\n' >> "$profile"
   update_marker_block "$HOME/.zprofile" '# AISONNET:BEGIN' '# AISONNET:END' "$profile"
   rm -f "$profile"
+  # Cai skill di kem vao ~/.claude/skills de moi phien Claude dung duoc.
+  if [ -d "$ROOT/skills" ]; then
+    for skill_dir in "$ROOT"/skills/*/; do
+      [ -d "$skill_dir" ] || continue
+      skill_name=$(basename "$skill_dir")
+      mkdir -p "$HOME/.claude/skills/$skill_name"
+      cp -R "$skill_dir". "$HOME/.claude/skills/$skill_name/"
+      log_info "Da cai skill: $skill_name"
+    done
+  fi
   global_block="$ROOT/templates/global-claude-block-mac.md"
   if [ -f "$global_block" ]; then
     update_marker_block "$HOME/.claude/CLAUDE.md" '<!-- AISONNET:BEGIN' \

@@ -39,7 +39,8 @@ Bộ cài đã giải nén ở `~/AISONNET` (nếu chưa: `mkdir -p ~/AISONNET &
 ## Phase 6 — Khoá API
 1. `bash ~/AISONNET/scripts/mac/50-keys-sync.sh --prepare --open-editor` → tạo `~/AISONNET/.env`, biểu tượng Desktop "Mo file khoa API.command" (bấm đúp để mở lại), mở TextEdit. Dẫn từng dịch vụ như Windows (Apify, Genmax, Gemini, Telegram — xem bảng ở `SETUP.md` Phase 5; dán vào TextEdit, **Cmd+S**; **không dán vào chat**).
 2. Giọng Genmax mặc định đã điền sẵn: **Adam**, model `eleven_v3`, tự thêm thẻ cảm xúc (`GENMAX_EMOTION_TAGS=1`).
-3. **Telegram (nếu dùng):** làm đúng mục "Telegram chi tiết" trong `SETUP.md` (bước 1–5), lệnh Mac là `bash ~/AISONNET/scripts/mac/50-keys-sync.sh --fetch-telegram-chat-id`.
+3. **RapidAPI TikTok:** cũng điền `TIKTOK_API23_KEY` (hướng dẫn và ảnh ở `skills/rapidapi-tiktok-api23/references/`, bảng khoá trong `SETUP.md` Phase 5); skill này được `50-keys-sync.sh` tự chép vào `~/.claude/skills/`.
+3b. **Telegram (nếu dùng):** làm đúng mục "Telegram chi tiết" trong `SETUP.md` (bước 1–5), lệnh Mac là `bash ~/AISONNET/scripts/mac/50-keys-sync.sh --fetch-telegram-chat-id`.
 4. Sau khi học viên báo "đã lưu": `bash ~/AISONNET/scripts/mac/50-keys-sync.sh` (kiểm API thật, ghi biến vào `~/.zprofile`, khối ghi chú vào `~/.claude/CLAUDE.md`). Thêm `--skip-telegram` nếu không dùng Telegram.
 5. **Đóng hẳn Claude và Terminal (Cmd+Q), mở lại.**
 

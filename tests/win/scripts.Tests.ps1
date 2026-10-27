@@ -153,6 +153,28 @@ Test-Case 'keys: -SkipTelegram bo qua han buoc Telegram' {
     Assert-NotContains $r.Output $fakeTele
 }
 
+Test-Case 'keys: cai skill rapidapi-tiktok-api23 vao ~\.claude\skills (idempotent, giu skill khac)' {
+    $skRoot = Join-Path $sbx 'keys-skill'; $skHome = Join-Path $sbx 'claude-skill'
+    New-Item -ItemType Directory -Path (Join-Path $skHome 'skills\skill-cua-hoc-vien') -Force | Out-Null
+    [IO.File]::WriteAllText((Join-Path $skHome 'skills\skill-cua-hoc-vien\SKILL.md'), 'giu nguyen')
+    $null = Invoke-Script '50-keys-sync.ps1' @('-Root', $skRoot, '-Prepare', '-DesktopDir', $desk, '-ClaudeHome', $skHome)
+    $null = Invoke-Script '50-keys-sync.ps1' @('-Root', $skRoot, '-DesktopDir', $desk, '-ClaudeHome', $skHome)
+    $null = Invoke-Script '50-keys-sync.ps1' @('-Root', $skRoot, '-DesktopDir', $desk, '-ClaudeHome', $skHome)
+    $dest = Join-Path $skHome 'skills\rapidapi-tiktok-api23'
+    Assert-True (Test-Path -LiteralPath (Join-Path $dest 'SKILL.md')) 'chua cai SKILL.md'
+    Assert-True (Test-Path -LiteralPath (Join-Path $dest 'scripts\tiktok_api.py')) 'chua cai script'
+    Assert-True (Test-Path -LiteralPath (Join-Path $dest 'references\images\05-copy-key.png')) 'chua cai anh'
+    Assert-Equal 'giu nguyen' ([IO.File]::ReadAllText((Join-Path $skHome 'skills\skill-cua-hoc-vien\SKILL.md')))
+}
+Test-Case 'keys: khoa RapidAPI bat buoc, dan nham ca doan code -> E_KEY_FORMAT, khoa khong lo' {
+    $rkRoot = Join-Path $sbx 'keys-rapid'; $rk = 'rapid' + ('Q' * 30)
+    $null = Invoke-Script '50-keys-sync.ps1' @('-Root', $rkRoot, '-Prepare', '-DesktopDir', $desk, '-ClaudeHome', $claudeHome)
+    Set-DotEnvValue (Join-Path $rkRoot '.env') 'TIKTOK_API23_KEY' ("x-rapidapi-key:" + $rk)
+    $r = Invoke-Script '50-keys-sync.ps1' @('-Root', $rkRoot, '-CheckOnly', '-DesktopDir', $desk, '-ClaudeHome', $claudeHome)
+    Assert-Contains $r.Output 'TIKTOK_API23_KEY | E_KEY_FORMAT'
+    Assert-NotContains $r.Output $rk
+}
+
 # ---------------------------------------------------------------- 90-export-report: khong lot khoa
 Test-Case 'export: bao cao KHONG chua khoa va che ten nguoi dung' {
     $exRoot = Join-Path $sbx 'export'

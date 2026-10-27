@@ -233,6 +233,36 @@ Test-Case 'log: loc khoa' {
     Assert-NotContains ([IO.File]::ReadAllText((Join-Path $root 'SETUP-LOG.md'))) $fakeGemini
 }
 
+Test-Case 'format: khoa RapidAPI dan nham ca doan code bi bao' {
+    Assert-Contains (Test-KeyFormat 'TIKTOK_API23_KEY' "x-rapidapi-key: abcdef1234567890abcd") 'x-rapidapi-key'
+}
+Test-Case 'format: khoa RapidAPI dang chuoi thuong hop le' {
+    Assert-Equal '' (Test-KeyFormat 'TIKTOK_API23_KEY' ('a1b2c3d4e5' * 4 + 'msh'))
+}
+Test-Case 'api spec: RapidAPI co host + key + User-Agent trinh duyet, khong in khoa' {
+    $spec = Get-ApiSpec 'TIKTOK_API23_KEY' ('k' * 40)
+    Assert-Contains $spec.Url 'tiktok-api23.p.rapidapi.com'
+    Assert-Equal 'tiktok-api23.p.rapidapi.com' $spec.Headers['x-rapidapi-host']
+    Assert-Contains $spec.Headers['User-Agent'] 'Mozilla'
+}
+Test-Case 'skill di kem: du file va script chi goi host RapidAPI' {
+    $sk = Join-Path $repo 'kit\skills\rapidapi-tiktok-api23'
+    foreach ($f in @('SKILL.md', 'scripts\tiktok_api.py', 'references\huong-dan-ket-noi.md')) {
+        Assert-True (Test-Path -LiteralPath (Join-Path $sk $f)) ('thieu ' + $f)
+    }
+    Assert-Equal 5 @(Get-ChildItem (Join-Path $sk 'references\images') -Filter *.png).Count
+    $py = [IO.File]::ReadAllText((Join-Path $sk 'scripts\tiktok_api.py'))
+    $hosts = [regex]::Matches($py, 'https?://[A-Za-z0-9\.\-]+') | ForEach-Object { $_.Value } | Sort-Object -Unique
+    foreach ($h in $hosts) { Assert-True ($h -match 'rapidapi\.com|tiktok\.com|docs\.tikfly\.io|python\.org|www\.python') ('host la trong script skill: ' + $h) }
+    Assert-NotContains $py 'os.system'
+    Assert-NotContains $py 'eval('
+}
+Test-Case 'mau .env co dong TIKTOK_API23_KEY' {
+    $tpl = Read-DotEnv (Join-Path $repo 'kit\templates\env.template')
+    Assert-True ($tpl.Contains('TIKTOK_API23_KEY')) 'thieu TIKTOK_API23_KEY'
+    Assert-Equal '' $tpl['TIKTOK_API23_KEY']
+}
+
 # ---------------------------------------------------------------- Get-TelegramSendOutcome
 Test-Case 'telegram: gui tin thanh cong' { Assert-Equal 'OK' (Get-TelegramSendOutcome 200 '{"ok":true}') }
 Test-Case 'telegram: token sai (401/404)' {

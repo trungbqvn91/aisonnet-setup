@@ -40,6 +40,7 @@ Xong khi `PREFLIGHT: OK`.
 | Apify | `APIFY_TOKEN` | `console.apify.com` → Settings → API & Integrations → copy Personal API token |
 | Genmax | `GENMAX_API_KEY` | đăng ký tại `https://genmax.io/?ref=mzkkz9` (link có sẵn ở đây, học viên không phải chờ ai gửi; đăng nhập Google), mở `https://genmax.io/docs`, bấm ô code đầu trang để copy khoá. Nạp credit nhập mã `KMGENMAX` được thêm 15% (không bắt buộc; tài khoản mới có ít credit dùng thử) |
 | Gemini | `GEMINI_API_KEY` | `aistudio.google.com/apikey` → đăng nhập Google → tạo khoá |
+| RapidAPI TikTok | `TIKTOK_API23_KEY` | Đăng ký/đăng nhập `https://rapidapi.com/Lundehund/api/tiktok-api23` → **Subscribe to run** → **Start Free Plan** (cột BASIC $0, 100 lượt/tháng, không cần thẻ) → **Get Started** → chọn 1 endpoint → tab **Code snippet** → copy **chỉ chuỗi sau `x-rapidapi-key`**. Ảnh từng bước: `skills/rapidapi-tiktok-api23/references/images/` (gửi ảnh tương ứng nếu học viên kẹt; hướng dẫn chi tiết ở `references/huong-dan-ket-noi.md`). **Bỏ qua `--setup-key` của skill**: khoá dán vào `.env` như các khoá khác |
 | Telegram (tuỳ chọn) | `TELEGRAM_BOT_TOKEN` | app Telegram → nhắn `@BotFather` → `/newbot` → copy token → nhắn bot của mình 1 câu |
 Nhắc: **không dán khoá vào khung chat**, không chụp ảnh/gửi file `.env`. Học viên chỉ cần báo “đã lưu”.
 **Telegram chi tiết (chỉ khi học viên chọn dùng; làm TRƯỚC 5b, mất khoảng 5 phút).** Không cần cài Telegram trên máy tính — dùng điện thoại là đủ. Dẫn học viên từng bước, mỗi lần một việc:
@@ -56,7 +57,7 @@ Công cụ đọc có sẵn: lệnh `genmax-tts --text "..." --out file.mp3` (đ
 Xong khi mọi khoá bắt buộc `OK` và các khoá tuỳ chọn là `OK` hoặc `BO_QUA` (do học viên chọn).
 
 ## Phase 6 — Toàn cục (làm trong cùng lần chạy `50-keys-sync.ps1` ở 5b)
-Script cũng: thêm `C:\AISONNET\tools` vào PATH User (lệnh `khoahoc-doctor`), đặt `PYTHONUTF8=1` (để chương trình Python in tiếng Việt không bị lỗi), ghi một khối ghi chú vào `~\.claude\CLAUDE.md` toàn cục (phần cũ giữ nguyên) để **mọi phiên Claude sau này** biết máy có gì. Xong khi script in “Da ghi khoi ghi chu AISONNET”.
+Script cũng: **cài skill đi kèm** (`skills\rapidapi-tiktok-api23` → `~\.claude\skills\`, để mọi phiên Claude gọi được API TikTok; không cần cài thêm gói Python), thêm `C:\AISONNET\tools` vào PATH User (lệnh `khoahoc-doctor`), đặt `PYTHONUTF8=1` (để chương trình Python in tiếng Việt không bị lỗi), ghi một khối ghi chú vào `~\.claude\CLAUDE.md` toàn cục (phần cũ giữ nguyên) để **mọi phiên Claude sau này** biết máy có gì. Xong khi script in “Da ghi khoi ghi chu AISONNET”.
 **Bắt buộc sau phase này:** học viên **đóng hẳn Claude (và mọi terminal) rồi mở lại** — biến môi trường mới chỉ hiện ở ứng dụng mở sau đó. Dặn họ mở Claude mới và dán: *“Tiếp tục cài đặt AISONNET: đọc C:\AISONNET\CLAUDE.md và SETUP.md rồi làm từ Phase 7.”*
 
 ## Phase 7 — Kiểm tra cuối (terminal MỚI, thư mục KHÁC)

@@ -15,7 +15,7 @@ if ($DryRun) {
 $secrets = New-Object System.Collections.ArrayList
 $dotenv = Read-DotEnv (Join-Path $Root '.env')
 foreach ($v in $dotenv.Values) { if ($v) { [void]$secrets.Add([string]$v) } }
-foreach ($name in @('APIFY_TOKEN', 'GENMAX_API_KEY', 'GENMAX_VOICE_ID', 'GEMINI_API_KEY', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID')) {
+foreach ($name in @('APIFY_TOKEN', 'GENMAX_API_KEY', 'GENMAX_VOICE_ID', 'GEMINI_API_KEY', 'TIKTOK_API23_KEY', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID')) {
     foreach ($scope in @('User', 'Process')) {
         $v = [Environment]::GetEnvironmentVariable($name, $scope)
         if ($v) { [void]$secrets.Add($v) }

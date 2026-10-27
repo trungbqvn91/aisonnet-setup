@@ -28,6 +28,7 @@ $keys = @(
     @{ Name = 'GENMAX_MODEL';       Required = $false },
     @{ Name = 'GENMAX_EMOTION_TAGS'; Required = $false },
     @{ Name = 'GEMINI_API_KEY';     Required = $true  },
+    @{ Name = 'TIKTOK_API23_KEY';   Required = $true  },
     @{ Name = 'TELEGRAM_BOT_TOKEN'; Required = $false },
     @{ Name = 'TELEGRAM_CHAT_ID';   Required = $false }
 )
@@ -169,6 +170,20 @@ if (-not $CheckOnly) {
     $toolsDir = Join-Path $Root 'tools'
     $newPath = Add-PathSegment (Get-UserEnv 'Path') $toolsDir
     Set-UserEnv 'Path' $newPath -DryRun:$DryRun
+
+    # Cai cac skill di kem (vd rapidapi-tiktok-api23) vao ~\.claude\skills de MOI phien Claude dung duoc.
+    $skillsSrc = Join-Path $script:KitRoot 'skills'
+    if (Test-Path -LiteralPath $skillsSrc) {
+        foreach ($skillDir in (Get-ChildItem -LiteralPath $skillsSrc -Directory)) {
+            $target = Join-Path (Join-Path $ClaudeHome 'skills') $skillDir.Name
+            if ($DryRun) { Write-Ascii ('[DryRun] Se cai skill ' + $skillDir.Name + ' vao ' + $target) }
+            else {
+                New-Item -ItemType Directory -Path $target -Force | Out-Null
+                Copy-Item -Path (Join-Path $skillDir.FullName '*') -Destination $target -Recurse -Force
+                Write-Ascii ('Da cai skill: ' + $skillDir.Name)
+            }
+        }
+    }
 
     $blockFile = Join-Path $script:KitRoot 'templates\global-claude-block.md'
     $claudeMd = Join-Path $ClaudeHome 'CLAUDE.md'
