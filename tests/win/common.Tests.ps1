@@ -263,6 +263,8 @@ Test-Case 'skill Genmax: tu mo link gioi thieu, nhac ma, cam tra tien thay hoc v
     Assert-Contains $t 'genmax-tts --open signup'; Assert-Contains $t 'genmax-tts --open topup'
     Assert-Contains $t 'KMGENMAX'
     Assert-Contains $t 'Không tự trả tiền'
+    Assert-Contains $t 'Enter voucher code (optional)'
+    Assert-NotContains $t '/html/body'
     Assert-True ($t -match '(?m)^description: .*nạp credit') 'mo ta (trigger) thieu "nap credit"'
 }
 Test-Case 'khoi toan cuc va SETUP nhac skill Genmax' {

@@ -25,7 +25,10 @@ Công cụ sẵn trên máy (đã cài cùng bộ cài AISONNET; chạy từ b�
 1. Chạy `genmax-tts --balance` để cho họ biết còn bao nhiêu.
 2. Chạy `genmax-tts --open topup` (tự mở trang), và **luôn nhắc mã `KMGENMAX`**: "Khi thanh toán, nhập mã **KMGENMAX** để được thêm 15% credit." Nhắc **trước khi** họ bấm trả tiền, không nhắc sau.
 3. Gói giá niêm yết ở trang chủ lúc 24/10/2026: 1.000.000 credit = $8; 2.500.000 = $16; 3.500.000 = $20; 7.000.000 = $36 (giá có thể đổi, lấy theo trang). Nạp nhiều được thêm bonus theo trang.
-4. Chưa biết chính xác ô nhập mã nằm ở đâu trên màn hình thanh toán. Nếu học viên không thấy ô nhập mã, nhờ họ mô tả màn hình đang hiện (nút, ô, chữ) rồi chỉ chỗ; không bịa vị trí.
+4. **Tìm ô nhập mã theo chữ hiển thị, không theo vị trí:** trong cửa sổ/bước mua credit có **một ô nhập mã voucher**, chữ gợi ý trong ô (placeholder) là `Enter voucher code (optional)` (nếu giao diện đã dịch thì là "Nhập mã voucher" hoặc tương tự). Hãy bảo học viên tìm ô có chữ đó, gõ `KMGENMAX`. Khi mã hợp lệ, trang hiện nhãn thưởng kiểu `+15% = … bonus credits`; **nếu thấy nhãn này thì mã đã áp dụng**, nếu không thì mã chưa được nhận.
+   - Mã có thể báo `Voucher code not found` (gõ sai, nhắc gõ đúng KMGENMAX viết hoa), `This voucher is no longer active`, `Voucher expired` hoặc `out of stock` (hết hạn/hết lượt). Gặp các trường hợp này thì **nói thật với học viên, để họ tự quyết có nạp tiếp không**; đừng hứa chắc chắn còn khuyến mại.
+   - Vị trí ô trên màn hình có thể khác theo cỡ cửa sổ hay khi Genmax đổi giao diện: **không** dựa vào XPath/vị trí. Không thấy ô đó thì nhờ học viên mô tả màn hình đang hiện (nút, ô, chữ) rồi chỉ chỗ; không bịa vị trí.
+   - Không nhầm với mục **Redeem code** (đổi mã quà tặng ra credit) nếu trang có; mã KMGENMAX nhập ở bước **mua credit** (ô voucher).
 5. Sau khi nạp xong, chạy lại `genmax-tts --balance` để xác nhận số dư tăng.
 
 ## Tự động nhắc khi gặp lỗi hết credit
