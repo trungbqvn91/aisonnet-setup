@@ -22,6 +22,8 @@ class Mock(http.server.BaseHTTPRequestHandler):
     """May chu gia Genmax. Cau hinh bang thuoc tinh lop; ghi lai moi request."""
     requests = []
     enhance_status = 200
+    credit_balance = 123456
+    tts_error = None
     v3_status = 202
     history_status = 'completed'
 
@@ -42,6 +44,8 @@ class Mock(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         Mock.requests.append(('GET', self.path, None, self.headers.get('xi-api-key')))
+        if self.path.startswith('/v1/auth/me'):
+            return self._reply(200, {'id': 'u1', 'email': 'a@b.c', 'credit_balance': Mock.credit_balance})
         if self.path.startswith('/v1/models'):
             return self._reply(200, [{'model_id': 'eleven_multilingual_v2', 'name': 'v2'},
                                      {'model_id': 'eleven_v3', 'name': 'Eleven v3'}])
@@ -66,6 +70,8 @@ class Mock(http.server.BaseHTTPRequestHandler):
                 return self._reply(Mock.enhance_status, {'message': 'enhance hong'})
             return self._reply(200, {'text': '[excited] ' + body['text'], 'enhanced': True})
         if self.path.startswith('/v1/text-to-speech/'):
+            if Mock.tts_error:
+                return self._reply(Mock.tts_error[0], {'message': Mock.tts_error[1]})
             if body.get('model_id') == 'eleven_v3' and Mock.v3_status != 202:
                 return self._reply(Mock.v3_status, {'message': 'language_code khong ho tro'})
             return self._reply(202, {'id': 'task-123', 'status': 'pending'})
@@ -87,6 +93,8 @@ class GenmaxTtsTest(unittest.TestCase):
     def setUp(self):
         Mock.requests = []
         Mock.enhance_status = 200
+        Mock.credit_balance = 123456
+        Mock.tts_error = None
         Mock.v3_status = 202
         Mock.history_status = 'completed'
         self.tmp = tempfile.mkdtemp()
@@ -246,6 +254,89 @@ class GenmaxTtsTest(unittest.TestCase):
         self.assertEqual(0, code, output)
         self.assertEqual(text, self.posts('/v1/text-to-speech/')[0][2]['text'])
         output.encode('ascii')  # moi dong in ra phai ASCII
+
+    # ---- dang ky / nap credit / ma khuyen mai (ky vong cua Trung: tu mo link, tu nhac ma)
+    def test_open_signup_opens_referral_link_and_reminds_code(self):
+        opened = []
+        original = genmax_tts.webbrowser.open
+        genmax_tts.webbrowser.open = lambda url: opened.append(url) or True
+        try:
+            code, output = self.run_main(['--open', 'signup'])
+        finally:
+            genmax_tts.webbrowser.open = original
+        self.assertEqual(0, code)
+        self.assertEqual(['https://genmax.io/?ref=mzkkz9'], opened)
+        self.assertIn('KMGENMAX', output)
+        self.assertEqual([], Mock.requests, 'mo link khong can goi API / khong can khoa')
+
+    def test_open_topup_opens_site_and_reminds_code(self):
+        opened = []
+        original = genmax_tts.webbrowser.open
+        genmax_tts.webbrowser.open = lambda url: opened.append(url) or True
+        try:
+            code, output = self.run_main(['--open', 'topup'])
+        finally:
+            genmax_tts.webbrowser.open = original
+        self.assertEqual(0, code)
+        self.assertEqual(['https://genmax.io/'], opened)
+        self.assertIn('KMGENMAX', output)
+        self.assertIn('15%', output)
+
+    def test_open_without_browser_still_prints_link(self):
+        original = genmax_tts.webbrowser.open
+        def boom(url):
+            raise RuntimeError('khong co trinh duyet')
+        genmax_tts.webbrowser.open = boom
+        try:
+            code, output = self.run_main(['--open', 'signup'])
+        finally:
+            genmax_tts.webbrowser.open = original
+        self.assertEqual(0, code)
+        self.assertIn('https://genmax.io/?ref=mzkkz9', output)
+        self.assertIn('KMGENMAX', output)
+
+    def test_open_works_without_api_key(self):
+        os.environ.pop('GENMAX_API_KEY')
+        original = genmax_tts.webbrowser.open
+        genmax_tts.webbrowser.open = lambda url: True
+        try:
+            code, _ = self.run_main(['--open', 'signup'])
+        finally:
+            genmax_tts.webbrowser.open = original
+        self.assertEqual(0, code)
+
+    def test_balance_shows_credit_and_no_hint_when_plenty(self):
+        code, output = self.run_main(['--balance'])
+        self.assertEqual(0, code)
+        self.assertIn('So du credit: 123456', output)
+        self.assertNotIn('KMGENMAX', output)
+        self.assertNotIn(FAKE_KEY, output)
+
+    def test_balance_low_credit_reminds_promo_code(self):
+        Mock.credit_balance = 1750
+        code, output = self.run_main(['--balance'])
+        self.assertEqual(0, code)
+        self.assertIn('CREDIT SAP HET', output)
+        self.assertIn('KMGENMAX', output)
+
+    def test_out_of_credit_error_reminds_topup_and_code(self):
+        Mock.tts_error = (402, 'Insufficient credit balance')
+        code, output = self.run_main(['--text', 'Chao', '--no-tags', '--out', self.out])
+        self.assertEqual(3, code)
+        self.assertIn('CO THE HET CREDIT', output)
+        self.assertIn('KMGENMAX', output)
+        self.assertNotIn(FAKE_KEY, output)
+
+    def test_other_errors_do_not_nag_about_credit(self):
+        Mock.tts_error = (400, 'language_code khong hop le')
+        original = genmax_tts.FALLBACK_MODEL
+        genmax_tts.FALLBACK_MODEL = 'eleven_v3'  # tat lui model de thay dung loi goc
+        try:
+            code, output = self.run_main(['--text', 'Chao', '--no-tags', '--out', self.out])
+        finally:
+            genmax_tts.FALLBACK_MODEL = original
+        self.assertEqual(3, code)
+        self.assertNotIn('KMGENMAX', output)
 
     def test_no_text_is_an_argument_error(self):
         code, _ = self.run_main(['--out', self.out])

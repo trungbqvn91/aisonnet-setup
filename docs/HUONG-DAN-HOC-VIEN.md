@@ -63,7 +63,7 @@ Claude mở file **khoá API** (Windows: Notepad; Mac: TextEdit) và dẫn từn
 | Dịch vụ | Dùng để | Lấy khoá ở đâu |
 |---|---|---|
 | **Apify** | Quét TikTok, Facebook | console.apify.com → Settings → API & Integrations → copy Personal API token |
-| **Genmax** | Tạo giọng đọc | Đăng ký bằng Google tại https://genmax.io/?ref=mzkkz9 (tài khoản mới có ít credit dùng thử), vào https://genmax.io/docs, copy khoá ở ô mã đầu trang. Nạp credit nhập mã **KMGENMAX** được thêm 15% (không bắt buộc) |
+| **Genmax** | Tạo giọng đọc | Nếu chưa có tài khoản, **Claude tự mở trang đăng ký** (bạn đăng ký bằng Google trong cửa sổ đó, không cần copy link; tài khoản mới có ít credit dùng thử), rồi vào genmax.io/docs copy khoá ở ô mã đầu trang. Khi nạp credit, Claude sẽ nhắc nhập mã **KMGENMAX** để được thêm 15% (không bắt buộc) |
 | **Gemini** | Phân tích video | aistudio.google.com/apikey → đăng nhập Google → tạo khoá |
 | **RapidAPI TikTok** | Lấy dữ liệu TikTok (user, video, quảng cáo top, tải video) | Đăng nhập https://rapidapi.com/Lundehund/api/tiktok-api23 → **Subscribe to run** → **Start Free Plan** (cột BASIC $0, 100 lượt/tháng, không cần thẻ) → **Get Started** → chọn 1 endpoint → tab **Code snippet** → copy **chỉ chuỗi sau `x-rapidapi-key`**. Claude có ảnh từng bước nếu bạn kẹt |
 | **Telegram** (tuỳ chọn) | Nhận thông báo | Tạo bot với **@BotFather** — xem mục "Kết nối Telegram" bên dưới |

@@ -3,6 +3,7 @@ Máy này (macOS) đã cài: Git, Python 3.12 (Homebrew), FFmpeg, môi trường
 Khoá là biến môi trường (ghi trong ~/.zprofile): APIFY_TOKEN, GENMAX_API_KEY, GEMINI_API_KEY, TIKTOK_API23_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID; cấu hình giọng: GENMAX_VOICE_ID, GENMAX_MODEL, GENMAX_EMOTION_TAGS.
 File khoá là `~/AISONNET/.env`; mở lại bằng biểu tượng “Mo file khoa API.command” trên Desktop.
 Giọng đọc MẶC ĐỊNH (Genmax → ElevenLabs): Adam (`pNInz6obpgDQGcFmaJgB`), model `eleven_v3`, TỰ thêm thẻ cảm xúc (Genmax `/v1/enhance`) rồi mới đọc. Dùng: `genmax-tts --text "..." --out file.mp3` (`--no-tags` để tắt). Chỉ đổi giọng/model khi học viên yêu cầu.
+Skill `genmax-dang-ky-nap-credit` (đã cài): khi học viên cần ĐĂNG KÝ Genmax thì tự mở link giới thiệu bằng `genmax-tts --open signup`; khi cần NẠP credit hoặc hết credit thì `genmax-tts --open topup` và LUÔN nhắc mã khuyến mại `KMGENMAX` (+15%) trước khi thanh toán; xem số dư bằng `genmax-tts --balance`. Không tự trả tiền hay xin thông tin thẻ.
 Skill `rapidapi-tiktok-api23` (đã cài ở ~/.claude/skills): gọi API TikTok qua RapidAPI (user/video/comment/search/quảng cáo top/tải video). Khoá đọc từ biến `TIKTOK_API23_KEY`; chạy bằng `python3` nếu `python` không có. Gói BASIC chỉ 100 lượt/tháng: đừng gọi thử bừa.
 Gặp lỗi chạy `khoahoc-doctor`; cài lại xem `~/AISONNET/SETUP-MAC.md`.
 Không in giá trị khoá ra khung chat. Trong Python đọc khoá từ `os.environ`; in tiếng Việt cần `PYTHONUTF8=1` (đã đặt sẵn).

@@ -165,6 +165,8 @@ Test-Case 'keys: cai skill rapidapi-tiktok-api23 vao ~\.claude\skills (idempoten
     Assert-True (Test-Path -LiteralPath (Join-Path $dest 'scripts\tiktok_api.py')) 'chua cai script'
     Assert-True (Test-Path -LiteralPath (Join-Path $dest 'references\images\05-copy-key.png')) 'chua cai anh'
     Assert-Equal 'giu nguyen' ([IO.File]::ReadAllText((Join-Path $skHome 'skills\skill-cua-hoc-vien\SKILL.md')))
+    $gm = [IO.File]::ReadAllText((Join-Path $skHome 'skills\genmax-dang-ky-nap-credit\SKILL.md'))
+    Assert-Contains $gm 'KMGENMAX'; Assert-Contains $gm 'genmax-tts --open signup'; Assert-Contains $gm 'ref=mzkkz9'
 }
 Test-Case 'keys: khoa RapidAPI bat buoc, dan nham ca doan code -> E_KEY_FORMAT, khoa khong lo' {
     $rkRoot = Join-Path $sbx 'keys-rapid'; $rk = 'rapid' + ('Q' * 30)

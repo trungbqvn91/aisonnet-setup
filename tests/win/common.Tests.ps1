@@ -257,6 +257,19 @@ Test-Case 'skill di kem: du file va script chi goi host RapidAPI' {
     Assert-NotContains $py 'os.system'
     Assert-NotContains $py 'eval('
 }
+Test-Case 'skill Genmax: tu mo link gioi thieu, nhac ma, cam tra tien thay hoc vien' {
+    $t = [IO.File]::ReadAllText((Join-Path $repo 'kit\skills\genmax-dang-ky-nap-credit\SKILL.md'))
+    Assert-Contains $t 'name: genmax-dang-ky-nap-credit'
+    Assert-Contains $t 'genmax-tts --open signup'; Assert-Contains $t 'genmax-tts --open topup'
+    Assert-Contains $t 'KMGENMAX'
+    Assert-Contains $t 'Không tự trả tiền'
+    Assert-True ($t -match '(?m)^description: .*nạp credit') 'mo ta (trigger) thieu "nap credit"'
+}
+Test-Case 'khoi toan cuc va SETUP nhac skill Genmax' {
+    foreach ($f in @('templates\global-claude-block.md', 'templates\global-claude-block-mac.md', 'SETUP.md')) {
+        Assert-Contains ([IO.File]::ReadAllText((Join-Path $repo ('kit\' + $f)))) 'genmax-dang-ky-nap-credit' ($f + ' chua nhac skill')
+    }
+}
 Test-Case 'mau .env co dong TIKTOK_API23_KEY' {
     $tpl = Read-DotEnv (Join-Path $repo 'kit\templates\env.template')
     Assert-True ($tpl.Contains('TIKTOK_API23_KEY')) 'thieu TIKTOK_API23_KEY'

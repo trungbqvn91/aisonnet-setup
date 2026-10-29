@@ -25,12 +25,18 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import webbrowser
 
 DEFAULT_VOICE = 'pNInz6obpgDQGcFmaJgB'  # Adam - Dominant, Firm (da xac nhan that voi Genmax)
 DEFAULT_MODEL = 'eleven_v3'
 # Model da chay that voi tieng Viet (AIEdit-trung, 24/09/2026); dung khi v3 bi tu choi.
 FALLBACK_MODEL = 'eleven_turbo_v2_5'
 DEFAULT_LANGUAGE = 'vi'
+# Dang ky / nap credit: LUON mo link gioi thieu va nhac ma khuyen mai (hoc vien khong phai copy gi).
+REFERRAL_URL = 'https://genmax.io/?ref=mzkkz9'
+SITE_URL = 'https://genmax.io/'
+PROMO_CODE = 'KMGENMAX'
+LOW_CREDIT_THRESHOLD = 5000  # nguong "sap het" (uoc luong, don vi credit cua Genmax)
 POLL_TIMEOUT_SECONDS = 180
 POLL_INTERVAL_SECONDS = 2
 # The cam xuc dang [excited], [short pause], [whispers] ...
@@ -214,6 +220,47 @@ def synthesize(text, key, voice, model, language, use_tags, out_path):
     return {'model': model, 'tags': tags_used, 'task': task_id, 'bytes': size}
 
 
+def open_page(kind):
+    """Mo trang dang ky (link gioi thieu) hoac nap credit, va nhac ma khuyen mai. Luon in URL de du phong."""
+    if kind == 'signup':
+        url = REFERRAL_URL
+        log('DANG KY: dang mo link gioi thieu. Hay dang ky TAI KHOAN MOI bang Google trong cua so vua mo.')
+        log('Neu ban DA CO tai khoan Genmax tu truoc thi link gioi thieu khong tinh duoc, nhung van dung binh thuong.')
+    else:
+        url = SITE_URL
+        log('NAP CREDIT: dang mo trang Genmax - tim muc mua/nap credit.')
+    log('MA KHUYEN MAI: %s  (nhap o buoc thanh toan de duoc them 15%% credit; khong bat buoc)' % PROMO_CODE)
+    try:
+        opened = webbrowser.open(url)
+    except Exception:  # khong co trinh duyet mac dinh / moi truong khong co man hinh
+        opened = False
+    log('Da mo trinh duyet.' if opened else 'Khong tu mo duoc trinh duyet - hay mo link nay: ' + url)
+    log('LINK: ' + url)
+    return 0
+
+
+def credit_hint(prefix):
+    """Nhac nap credit + ma khuyen mai (goi khi het/sap het credit)."""
+    log('%s Nap them credit: chay "genmax-tts --open topup" (tu mo trang) va nhap ma %s o buoc thanh toan de duoc them 15%%.'
+        % (prefix, PROMO_CODE))
+
+
+def show_balance(key):
+    """In so du credit (GET /v1/auth/me, khong ton credit). Nhac nap neu sap het."""
+    me = call('GET', '/v1/auth/me', key)
+    balance = me.get('credit_balance') if isinstance(me, dict) else None
+    if balance is None:
+        log('Khong doc duoc so du credit.')
+        return 0
+    log('So du credit: %s' % balance)
+    try:
+        if float(balance) < LOW_CREDIT_THRESHOLD:
+            credit_hint('CREDIT SAP HET.')
+    except (TypeError, ValueError):
+        pass
+    return 0
+
+
 def list_models(key):
     models = call('GET', '/v1/models', key)
     log('model_id | ten')
@@ -232,9 +279,13 @@ def main(argv=None):
     parser.add_argument('--language', default=DEFAULT_LANGUAGE)
     parser.add_argument('--no-tags', action='store_true', help='tat tu dong them the cam xuc')
     parser.add_argument('--list-models', action='store_true')
+    parser.add_argument('--open', choices=['signup', 'topup'], help='mo trang dang ky (link gioi thieu) hoac nap credit va nhac ma khuyen mai')
+    parser.add_argument('--balance', action='store_true', help='xem so du credit')
     parser.add_argument('--dry-run', action='store_true')
     args = parser.parse_args(argv)
 
+    if args.open:
+        return open_page(args.open)
     settings = get_settings()
     voice = args.voice or settings.get('GENMAX_VOICE_ID') or DEFAULT_VOICE
     model = args.model or settings.get('GENMAX_MODEL') or DEFAULT_MODEL
@@ -245,7 +296,7 @@ def main(argv=None):
     if args.text_file:
         with open(args.text_file, encoding='utf-8-sig') as handle:
             text = handle.read()
-    if not args.list_models and not (text and text.strip()):
+    if not args.list_models and not args.balance and not (text and text.strip()):
         log('E_ARGS: can --text hoac --text-file (hoac --list-models).')
         return 2
 
@@ -257,12 +308,16 @@ def main(argv=None):
         return 2
 
     try:
+        if args.balance:
+            return show_balance(key)
         if args.list_models:
             list_models(key)
             return 0
         result = synthesize(text, key, voice, model, args.language, use_tags, args.out)
     except ApiError as error:
         log('E_GENMAX: %s (http=%s)' % (error.message, error.status))
+        if error.status in (402, 429) or re.search(r'credit|quota|insufficient|balance', error.message, re.I):
+            credit_hint('CO THE HET CREDIT.')
         return 3
     log('OK: da luu %s (%d byte) | model=%s | the cam xuc=%s | task=%s'
         % (args.out, result['bytes'], result['model'], 'co' if result['tags'] else 'khong', result['task']))
