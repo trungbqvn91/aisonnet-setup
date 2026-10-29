@@ -34,7 +34,7 @@ FALLBACK_MODEL = 'eleven_turbo_v2_5'
 DEFAULT_LANGUAGE = 'vi'
 # Dang ky / nap credit: LUON mo link gioi thieu va nhac ma khuyen mai (hoc vien khong phai copy gi).
 REFERRAL_URL = 'https://genmax.io/?ref=mzkkz9'
-SITE_URL = 'https://genmax.io/'
+SITE_URL = 'https://genmax.io/app/pricing'  # trang Bang gia (can dang nhap): bam Mua ngay -> o ma khuyen mai
 PROMO_CODE = 'KMGENMAX'
 LOW_CREDIT_THRESHOLD = 5000  # nguong "sap het" (uoc luong, don vi credit cua Genmax)
 POLL_TIMEOUT_SECONDS = 180
@@ -228,8 +228,8 @@ def open_page(kind):
         log('Neu ban DA CO tai khoan Genmax tu truoc thi link gioi thieu khong tinh duoc, nhung van dung binh thuong.')
     else:
         url = SITE_URL
-        log('NAP CREDIT: dang mo trang Genmax - tim muc mua/nap credit.')
-    log('MA KHUYEN MAI: %s  (nhap o buoc thanh toan de duoc them 15%% credit; khong bat buoc)' % PROMO_CODE)
+        log('NAP CREDIT: dang mo trang Bang gia. Chon goi, bam "Mua ngay", nhap ma vao o "Nhap ma khuyen mai (neu co)" TRUOC khi chon cach thanh toan.')
+    log('MA KHUYEN MAI: %s  (nhap o cua so "Hoan tat thanh toan" de duoc them 15%% credit; khong bat buoc)' % PROMO_CODE)
     try:
         opened = webbrowser.open(url)
     except Exception:  # khong co trinh duyet mac dinh / moi truong khong co man hinh

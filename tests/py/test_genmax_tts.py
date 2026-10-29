@@ -278,7 +278,7 @@ class GenmaxTtsTest(unittest.TestCase):
         finally:
             genmax_tts.webbrowser.open = original
         self.assertEqual(0, code)
-        self.assertEqual(['https://genmax.io/'], opened)
+        self.assertEqual(['https://genmax.io/app/pricing'], opened)
         self.assertIn('KMGENMAX', output)
         self.assertIn('15%', output)
 
