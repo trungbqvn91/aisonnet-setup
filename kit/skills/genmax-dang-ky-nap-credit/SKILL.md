@@ -31,6 +31,12 @@ Công cụ sẵn trên máy (đã cài cùng bộ cài AISONNET; chạy từ b�
 ## Tự động nhắc khi gặp lỗi hết credit
 Gọi Genmax báo 402/429 hoặc chữ `credit/quota/insufficient`, hoặc `genmax-tts` in "CO THE HET CREDIT": dừng, nói với học viên bằng lời đời thường, rồi làm đúng mục "NẠP CREDIT" ở trên. Khoá vẫn đúng, chỉ cần nạp thêm.
 
+## Lỗi 403 `error code: 1010` khi gọi Genmax bằng Python
+**Không phải khoá sai.** Đây là Cloudflare (lớp bảo vệ trước Genmax) chặn "chữ ký" của chương trình Python mặc định (`Python-urllib`, và có thể cả `requests`/`httpx` trần), trong khi **PowerShell, curl và trình duyệt vẫn gọi được cùng khoá đó**. Một số máy bị, một số không.
+- `genmax-tts` (bản v0.3.4 trở lên) đã tự gửi User-Agent như trình duyệt nên không bị nữa. Gặp 1010 khi dùng `genmax-tts` thì bộ cài đang cũ: chạy lại bộ cài để cập nhật.
+- **Khi tự viết code Python gọi `api.genmax.io`** (kể cả `requests`): luôn thêm header `User-Agent` kiểu trình duyệt, ví dụ `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36`, cùng `xi-api-key`. Nếu vẫn bị chặn thì **gọi qua PowerShell** (`Invoke-RestMethod -Headers @{'xi-api-key'=$env:GENMAX_API_KEY}`) hoặc `curl`, rồi để Python xử lý file kết quả.
+- Đừng bảo học viên đổi khoá hay tạo lại tài khoản vì lỗi này; đừng đo bằng cách gọi liên tục (làm tốn credit).
+
 ## Điều không được làm
 - **Không tự trả tiền, không xin/nhập số thẻ, mật khẩu hay mã OTP** của học viên; chuyển khoản học viên tự làm trong app ngân hàng. Mở trang rồi để họ tự làm.
 - Không in giá trị khoá; không dán khoá vào chat.

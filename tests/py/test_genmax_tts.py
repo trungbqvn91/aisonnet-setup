@@ -21,6 +21,8 @@ AUDIO_BYTES = b'ID3FAKE-AUDIO-BYTES'
 class Mock(http.server.BaseHTTPRequestHandler):
     """May chu gia Genmax. Cau hinh bang thuoc tinh lop; ghi lai moi request."""
     requests = []
+    user_agents = []
+    block_python_ua = False
     enhance_status = 200
     credit_balance = 123456
     tts_error = None
@@ -42,7 +44,18 @@ class Mock(http.server.BaseHTTPRequestHandler):
         length = int(self.headers.get('Content-Length') or 0)
         return json.loads(self.rfile.read(length).decode('utf-8')) if length else {}
 
+    def _blocked(self):
+        """Gia lap Cloudflare: chan User-Agent mac dinh cua Python (HTTP 403, error code: 1010)."""
+        agent = self.headers.get('User-Agent', '')
+        Mock.user_agents.append(agent)
+        if Mock.block_python_ua and 'python-urllib' in agent.lower():
+            self._reply(403, None, raw=b'error code: 1010')
+            return True
+        return False
+
     def do_GET(self):
+        if self._blocked():
+            return None
         Mock.requests.append(('GET', self.path, None, self.headers.get('xi-api-key')))
         if self.path.startswith('/v1/auth/me'):
             return self._reply(200, {'id': 'u1', 'email': 'a@b.c', 'credit_balance': Mock.credit_balance})
@@ -63,6 +76,8 @@ class Mock(http.server.BaseHTTPRequestHandler):
         return self._reply(404, {'message': 'khong co'})
 
     def do_POST(self):
+        if self._blocked():
+            return None
         body = self._body()
         Mock.requests.append(('POST', self.path, body, self.headers.get('xi-api-key')))
         if self.path == '/v1/enhance':
@@ -92,6 +107,8 @@ class GenmaxTtsTest(unittest.TestCase):
 
     def setUp(self):
         Mock.requests = []
+        Mock.user_agents = []
+        Mock.block_python_ua = False
         Mock.enhance_status = 200
         Mock.credit_balance = 123456
         Mock.tts_error = None
@@ -337,6 +354,33 @@ class GenmaxTtsTest(unittest.TestCase):
             genmax_tts.FALLBACK_MODEL = original
         self.assertEqual(3, code)
         self.assertNotIn('KMGENMAX', output)
+
+    # ---- Cloudflare 1010: Python-urllib bi chan, PowerShell/trinh duyet qua duoc
+    def test_requests_use_browser_user_agent_not_python_urllib(self):
+        code, output = self.run_main(['--text', 'Chao', '--no-tags', '--out', self.out])
+        self.assertEqual(0, code, output)
+        self.assertTrue(Mock.user_agents, 'khong thay request nao')
+        for agent in Mock.user_agents:
+            self.assertNotIn('python-urllib', agent.lower())
+            self.assertIn('Mozilla/5.0', agent)
+
+    def test_works_when_cloudflare_blocks_default_python_agent(self):
+        Mock.block_python_ua = True
+        code, output = self.run_main(['--text', 'Chao', '--out', self.out])
+        self.assertEqual(0, code, output)
+        self.assertNotIn('1010', output)
+
+    def test_balance_works_when_cloudflare_blocks_default_python_agent(self):
+        Mock.block_python_ua = True
+        code, output = self.run_main(['--balance'])
+        self.assertEqual(0, code, output)
+        self.assertIn('So du credit', output)
+
+    def test_1010_error_gives_clear_hint_not_key_blame(self):
+        error = genmax_tts.ApiError(403, 'error code: 1010')
+        self.assertTrue(genmax_tts.is_cloudflare_block(error))
+        self.assertFalse(genmax_tts.is_cloudflare_block(genmax_tts.ApiError(401, 'invalid key')))
+        self.assertFalse(genmax_tts.is_cloudflare_block(genmax_tts.ApiError(403, 'forbidden: wrong key')))
 
     def test_no_text_is_an_argument_error(self):
         code, _ = self.run_main(['--out', self.out])

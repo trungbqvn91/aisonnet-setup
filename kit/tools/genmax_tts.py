@@ -36,6 +36,10 @@ DEFAULT_LANGUAGE = 'vi'
 REFERRAL_URL = 'https://genmax.io/?ref=mzkkz9'
 SITE_URL = 'https://genmax.io/app/pricing'  # trang Bang gia (can dang nhap): bam Mua ngay -> o ma khuyen mai
 PROMO_CODE = 'KMGENMAX'
+# Cloudflare (truoc Genmax) chan chu ky 'Python-urllib' mac dinh -> HTTP 403 "error code: 1010".
+# Gui User-Agent nhu trinh duyet (giong PowerShell/curl, vao duoc).
+BROWSER_UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+              'Chrome/125.0 Safari/537.36')
 LOW_CREDIT_THRESHOLD = 5000  # nguong "sap het" (uoc luong, don vi credit cua Genmax)
 POLL_TIMEOUT_SECONDS = 180
 POLL_INTERVAL_SECONDS = 2
@@ -109,6 +113,11 @@ def get_settings():
     return env
 
 
+def is_cloudflare_block(error):
+    """403 + 'error code: 1010' = Cloudflare chan chu ky Python (khong phai khoa sai)."""
+    return error.status == 403 and bool(re.search(r'1010|cloudflare', error.message, re.I))
+
+
 def short_message(raw):
     """Rut gon thong bao loi cua Genmax (khong bao gio chua khoa)."""
     text = raw.decode('utf-8', 'replace') if isinstance(raw, bytes) else str(raw)
@@ -127,6 +136,8 @@ def call(method, path, key, body=None, timeout=60):
     data = json.dumps(body).encode('utf-8') if body is not None else None
     request = urllib.request.Request(base_url() + path, data=data, method=method)
     request.add_header('xi-api-key', key)
+    request.add_header('User-Agent', BROWSER_UA)
+    request.add_header('Accept', 'application/json')
     if data is not None:
         request.add_header('Content-Type', 'application/json')
     try:
@@ -185,7 +196,8 @@ def wait_for_audio(task_id, key):
 def download(audio_url, out_path):
     """Tai file audio ve (khong gui khoa)."""
     try:
-        with urllib.request.urlopen(audio_url, timeout=120) as response:
+        audio_request = urllib.request.Request(audio_url, headers={'User-Agent': BROWSER_UA})
+        with urllib.request.urlopen(audio_request, timeout=120) as response:
             content = response.read()
     except (urllib.error.URLError, OSError) as error:
         raise ApiError(0, 'khong tai duoc file audio: ' + type(getattr(error, 'reason', error)).__name__)
@@ -316,6 +328,9 @@ def main(argv=None):
         result = synthesize(text, key, voice, model, args.language, use_tags, args.out)
     except ApiError as error:
         log('E_GENMAX: %s (http=%s)' % (error.message, error.status))
+        if is_cloudflare_block(error):
+            log('GOI Y: day la Cloudflare chan chu ky chuong trinh (loi 1010), KHONG phai khoa sai. '
+                'Cap nhat bo cai len ban moi nhat, hoac goi Genmax bang PowerShell/curl (xem skill genmax-dang-ky-nap-credit).')
         if error.status in (402, 429) or re.search(r'credit|quota|insufficient|balance', error.message, re.I):
             credit_hint('CO THE HET CREDIT.')
         return 3
